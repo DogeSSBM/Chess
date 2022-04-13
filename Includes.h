@@ -10,6 +10,5 @@
 #include <stdio.h>
 
 #include "Types.h"
-#include "IO.h"
-#include "Game.h"
 #include "Print.h"
+#include "Game.h"

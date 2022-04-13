@@ -39,4 +39,14 @@ typedef union{
     };
 }Pairu;
 
+typedef struct{
+    Pairu selected;
+    Pairu targeted;
+}Move;
+
+void clearTerm(void)
+{
+    wprintf(__extension__(L"\e[1;1H\e[2J"));
+}
+
 #endif /* end of include guard: TYPES_H */

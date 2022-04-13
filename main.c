@@ -17,16 +17,9 @@ int main(int argc, char **argv)
     GameState state = S_NEUTRAL;
     Color turn = C_WHITE;
     while(state < S_MATE_W){
-        clearTerm();
-
-        printTurn(turn);
-        printBoard(board);
-        printBoardColors(board);
-        printBoardS(board, (const Pairu){.x=1, .y=1});
-        printBoardST(board, (const Pairu){.x=1, .y=1}, (const Pairu){.x=1, .y=2});
-        printBoardST(board, (const Pairu){.x=1, .y=1}, (const Pairu){.x=1, .y=1});
-        while(fgetc(stdin) != '\n');
-
+        Move move = getColorsMove(board, turn);
+        printBoardMove(board, move);
+        getMove();
         turn = nextTurnColor(turn);
     }
 

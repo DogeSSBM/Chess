@@ -1,6 +1,8 @@
 #ifndef PRINT_H
 #define PRINT_H
 
+Color pieceColor(const wc);
+
 void printBoardHelper(wc board[8][8], const bool colorsOnly, const Pairu select, const Pairu target)
 {
     fputws(L"    a   b   c   d   e   f   g   h  \n",stdout);
@@ -35,6 +37,7 @@ void printBoardHelper(wc board[8][8], const bool colorsOnly, const Pairu select,
     }
     fputws(L"    a   b   c   d   e   f   g   h  \n",stdout);
 }
+
 void printBoard(wc board[8][8])
 {
     printBoardHelper(board, false, (const Pairu){.x=9,.y=9}, (const Pairu){.x=9,.y=9});
@@ -45,9 +48,9 @@ void printBoardS(wc board[8][8], const Pairu selectedPiece)
     printBoardHelper(board, false, selectedPiece, (const Pairu){.x=9,.y=9});
 }
 
-void printBoardST(wc board[8][8], const Pairu selectedPiece, const Pairu targetedPiece)
+void printBoardMove(wc board[8][8], const Move move)
 {
-    printBoardHelper(board, false, selectedPiece, targetedPiece);
+    printBoardHelper(board, false, move.selected, move.targeted);
 }
 
 void printBoardColors(wc board[8][8])
@@ -55,7 +58,7 @@ void printBoardColors(wc board[8][8])
     printBoardHelper(board, true, (const Pairu){.x=9,.y=9}, (const Pairu){.x=9,.y=9});
 }
 
-void printTurn(const Color turn)
+void printTurnLabel(const Color turn)
 {
     if(turn == C_WHITE)
         wprintf(L"White's turn -\n");
@@ -65,6 +68,18 @@ void printTurn(const Color turn)
         fwprintf(stderr, L"Error: turn is not valid color\n(int)turn == %i\n", (int)turn);
         exit(EXIT_FAILURE);
     }
+}
+
+void printPromptMove(void)
+{
+    wprintf(L"Enter turn...\n");
+}
+
+void printTurn(wc board[8][8], const Color turn)
+{
+    printTurnLabel(turn);
+    printBoard(board);
+    printPromptMove();
 }
 
 #endif /* end of include guard: PRINT_H */
