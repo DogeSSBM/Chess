@@ -1,0 +1,28 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+C_BLACK	Types.h	/^typedef enum{C_NONE, C_WHITE, C_BLACK}Color;$/;"	e	enum:__anon2
+C_NONE	Types.h	/^typedef enum{C_NONE, C_WHITE, C_BLACK}Color;$/;"	e	enum:__anon2
+C_WHITE	Types.h	/^typedef enum{C_NONE, C_WHITE, C_BLACK}Color;$/;"	e	enum:__anon2
+Color	Types.h	/^typedef enum{C_NONE, C_WHITE, C_BLACK}Color;$/;"	t	typeref:enum:__anon2
+GAME_H	Game.h	2;"	d
+GameState	Types.h	/^typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;$/;"	t	typeref:enum:__anon1
+IO_H	IO.h	2;"	d
+PRINT_H	Print.h	2;"	d
+S_CHECK_B	Types.h	/^typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;$/;"	e	enum:__anon1
+S_CHECK_W	Types.h	/^typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;$/;"	e	enum:__anon1
+S_MATE_B	Types.h	/^typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;$/;"	e	enum:__anon1
+S_MATE_W	Types.h	/^typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;$/;"	e	enum:__anon1
+S_NEUTRAL	Types.h	/^typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;$/;"	e	enum:__anon1
+TYPES_H	Types.h	2;"	d
+clearTerm	IO.h	/^void clearTerm(void)$/;"	f
+main	main.c	/^int main(int argc, char **argv)$/;"	f
+nextTurnColor	Game.h	/^Color nextTurnColor(const Color current)$/;"	f
+pieceColor	Game.h	/^Color pieceColor(const wc piece)$/;"	f
+printBoard	Print.h	/^void printBoard(wc board[8][8])$/;"	f
+printBoardColors	Print.h	/^void printBoardColors(wc board[8][8])$/;"	f
+printTurn	Print.h	/^void printTurn(const Color turn)$/;"	f
+wc	Types.h	/^typedef wchar_t wc;$/;"	t
