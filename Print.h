@@ -70,16 +70,19 @@ void printTurnLabel(const Color turn)
     }
 }
 
-void printPromptMove(void)
+void printMovePrompt(void)
 {
     wprintf(L"Enter turn...\n");
 }
 
-void printTurn(wc board[8][8], const Color turn)
+void printTargetPrompt(void)
 {
-    printTurnLabel(turn);
-    printBoard(board);
-    printPromptMove();
+    wprintf(L"Enter target or nothing to clear...\n");
+}
+
+void printConfirmPrompt(void)
+{
+    wprintf(L"Confirm move (Y/n)...\n");
 }
 
 #endif /* end of include guard: PRINT_H */

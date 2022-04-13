@@ -17,9 +17,8 @@ int main(int argc, char **argv)
     GameState state = S_NEUTRAL;
     Color turn = C_WHITE;
     while(state < S_MATE_W){
-        Move move = getColorsMove(board, turn);
-        printBoardMove(board, move);
-        getMove();
+        const Move move = getColorsMove(board, turn);
+        applyMove(board, move);
         turn = nextTurnColor(turn);
     }
 

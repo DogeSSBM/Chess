@@ -49,4 +49,14 @@ void clearTerm(void)
     wprintf(__extension__(L"\e[1;1H\e[2J"));
 }
 
+bool eqPairu(const Pairu p1, const Pairu p2)
+{
+    return p1.x == p2.x && p1.y == p2.y;
+}
+
+bool eqPairs(const Pairs p1, const Pairs p2)
+{
+    return p1.x == p2.x && p1.y == p2.y;
+}
+
 #endif /* end of include guard: TYPES_H */
