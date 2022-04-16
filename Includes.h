@@ -10,5 +10,7 @@
 #include <stdio.h>
 
 #include "Types.h"
+#include "Board.h"
+#include "MoveCheck.h"
 #include "Print.h"
 #include "Game.h"

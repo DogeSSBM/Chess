@@ -3,8 +3,11 @@
 
 Color pieceColor(const wc);
 
-void printBoardHelper(wc board[8][8], const bool colorsOnly, const Pairu select, const Pairu target)
+void printBoardHelper(wc board[8][8], const bool colors, const Pairu select, const Pairu target)
 {
+    MoveType moves[8][8] = {0};
+    if(pairuInBounds(select) && !pairuInBounds(target))
+        findValidMoves(board, moves, select);
     fputws(L"    a   b   c   d   e   f   g   h  \n",stdout);
     fputws(L"  +---+---+---+---+---+---+---+---+\n",stdout);
     for(int y = 0; y < 8; y++){
@@ -13,8 +16,14 @@ void printBoardHelper(wc board[8][8], const bool colorsOnly, const Pairu select,
         for(int x = 0; x < 8; x++){
             const bool selected = x == select.x && y == select.y;
             const bool targeted = x == target.x && y == target.y;
+            const MoveType mt = getMoveAt(moves, (const Pairu){.x=x,.y=y});
             wc l = L' ';
             wc r = L' ';
+            if(mt == M_CAPTURE){
+                l = L'(';
+                r = L')';
+            }
+
             if(selected){
                 l = targeted?L'}':L'[';
                 r = targeted?L'{':L']';
@@ -23,7 +32,7 @@ void printBoardHelper(wc board[8][8], const bool colorsOnly, const Pairu select,
                 r = L'<';
             }
             wc p = board[y][x];
-            if(colorsOnly)
+            if(colors)
                 p = pieceColor(board[y][x]) == C_WHITE?L'W':L'B';
             fputwc(l,stdout);
             fputwc(p,stdout);
