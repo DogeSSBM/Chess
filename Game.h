@@ -13,8 +13,10 @@ Color nextTurnColor(const Color current)
 {
     if(current == C_WHITE)
         return C_BLACK;
+
     else if(current == C_BLACK)
         return C_WHITE;
+
     else{
         fwprintf(stderr, L"Error: current turn color is not valid color\n(int)current == %i\n", (int)current);
         exit(EXIT_FAILURE);
@@ -99,9 +101,9 @@ bool applyMove(wc board[8][8], const Move move)
 {
     const wc srcPiece = getAt(board, move.selected);
     const wc dstPiece = setAt(board, move.targeted, srcPiece);
-    if(areCastilable(srcPiece, dstPiece))
-        setAt(board, move.selected, dstPiece);
-    else
+    // if(areCastilable(srcPiece, dstPiece))
+    //     setAt(board, move.selected, dstPiece);
+    // else
         setAt(board, move.selected, L' ');
     return true;
 }

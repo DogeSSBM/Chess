@@ -1,4 +1,4 @@
 #!/bin/sh
 clear
-flags="-std=gnu11 -Wall -Wpedantic"
-gcc main.c $flags -o main.out
+set flags="-std=c99 -Wall -Wpedantic"
+cc main.c $flags -o main.out

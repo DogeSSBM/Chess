@@ -3,25 +3,25 @@
 
 bool pairuInBounds(const Pairu target)
 {
-    return target.x <= 8 && target.y <= 8;
+    return target.x < 8 && target.y < 8;
 }
 
-bool isValidAlpha(const char c)
+bool isValidAlpha(const wc c)
 {
-    return c >= 'a' && c <= 'h';
+    return c >= L'a' && c <= L'h';
 }
 
-bool isValidNum(const char c)
+bool isValidNum(const wc c)
 {
-    return c >= '0' && c <= '8';
+    return c >= L'0' && c <= L'8';
 }
 
-uint coordToUint(const char c)
+uint coordToUint(const wc c)
 {
     if(isValidNum(c))
-        return '8' - c;
+        return L'8' - c;
     if(isValidAlpha(c))
-        return c - 'a';
+        return c - L'a';
     return 9;
 }
 
@@ -60,7 +60,7 @@ Color pieceColor(const wc piece)
         return C_BLACK;
 
     if(piece != L' '){
-        fwprintf(stderr, L"Error: \"%l\" is not a valid piece\n", piece);
+        fwprintf(stderr, L"Error: \'%lc\' is not a valid piece\n", piece);
         exit(EXIT_FAILURE);
     }
 

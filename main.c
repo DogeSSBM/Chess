@@ -1,6 +1,6 @@
 #include "Includes.h"
 
-int main(int argc, char **argv)
+int main(void)
 {
     setlocale(LC_ALL, "en_US.utf8");
 
@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     };
     GameState state = S_NEUTRAL;
     Color turn = C_WHITE;
-    while(state < S_MATE_W){
+    while(state != S_MATE_W){
         const Move move = getColorsMove(board, turn);
         applyMove(board, move);
         turn = nextTurnColor(turn);

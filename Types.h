@@ -7,6 +7,7 @@ typedef unsigned int uint;
 typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;
 typedef enum{C_NONE, C_WHITE, C_BLACK}Color;
 typedef enum{M_INVALID, M_VALID, M_CAPTURE}MoveType;
+typedef enum{A_ADJ, A_DAG}Algn;
 typedef enum{D_U, D_R, D_D, D_L}Dir;
 typedef enum{P_DEFAULT, P_COLORS, P_MOVES}PrintType;
 
@@ -70,6 +71,16 @@ bool dirAlgnX(const Dir dir)
 bool dirAlgnY(const Dir dir)
 {
     return dir == D_U || dir == D_D;
+}
+
+bool dirPos(const Dir dir)
+{
+    return dir == D_D || dir == D_R;
+}
+
+bool dirNeg(const Dir dir)
+{
+    return dir == D_U || dir == D_L;
 }
 
 Dir dirInv(const Dir dir)

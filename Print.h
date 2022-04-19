@@ -6,24 +6,40 @@ Color pieceColor(const wc);
 void printBoardHelper(wc board[8][8], const bool colors, const Pairu select, const Pairu target)
 {
     MoveType moves[8][8] = {0};
-    if(pairuInBounds(select) && !pairuInBounds(target))
+    const bool showMoves = pairuInBounds(select);
+    if(showMoves){
         findValidMoves(board, moves, select);
+
+        for(int y = 0; y < 8; y++){
+            for(int x = 0; x < 8; x++){
+                const Pairu dst = {.x = x, .y = y};
+                MoveType mt = getMoveAt(moves, dst);
+                if(select.x == x && select.y == y)
+                    fputwc(getAt(board, select), stdout);
+                else if(mt == M_INVALID)
+                    fputwc(L'#' ,stdout);
+                else if(mt == M_VALID)
+                    fputwc(L' ' ,stdout);
+                else if(mt == M_CAPTURE)
+                    fputwc(L'!' ,stdout);
+            }
+            fputwc(L'\n',stdout);
+        }
+        fputwc(L'\n',stdout);
+    }
+
     fputws(L"    a   b   c   d   e   f   g   h  \n",stdout);
     fputws(L"  +---+---+---+---+---+---+---+---+\n",stdout);
     for(int y = 0; y < 8; y++){
         fputwc(btowc('8'-y),stdout);
         fputws(L" |",stdout);
         for(int x = 0; x < 8; x++){
+            const Pairu dst = {.x = x, .y = y};
             const bool selected = x == select.x && y == select.y;
             const bool targeted = x == target.x && y == target.y;
-            const MoveType mt = getMoveAt(moves, (const Pairu){.x=x,.y=y});
+
             wc l = L' ';
             wc r = L' ';
-            if(mt == M_CAPTURE){
-                l = L'(';
-                r = L')';
-            }
-
             if(selected){
                 l = targeted?L'}':L'[';
                 r = targeted?L'{':L']';
@@ -31,9 +47,22 @@ void printBoardHelper(wc board[8][8], const bool colors, const Pairu select, con
                 l = L'>';
                 r = L'<';
             }
-            wc p = board[y][x];
-            if(colors)
-                p = pieceColor(board[y][x]) == C_WHITE?L'W':L'B';
+
+            wc p = getAt(board, dst);
+            MoveType mt;
+            if(showMoves)
+                mt = getMoveAt(moves, select);
+
+            if(showMoves){
+                if(mt == M_VALID)
+                    p = L'+';
+                else if(mt == M_CAPTURE){
+                    l = L'>';
+                    r = L'<';
+                }
+            }else if(colors)
+                p = pieceColor(p) == C_WHITE?L'W':L'B';
+
             fputwc(l,stdout);
             fputwc(p,stdout);
             fputwc(r,stdout);
