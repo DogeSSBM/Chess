@@ -102,6 +102,7 @@ Move readTarget(Move move)
 Move readMove(void)
 {
     Move ret = {
+        .type = M_INVALID;
         .selected.x = 9, .selected.y = 9,
         .targeted.x = 9, .targeted.y = 9
     };
@@ -113,15 +114,30 @@ Move readMove(void)
             break;
         i++;
     }
+    
+    if(i == 4){
+        ret.type = M_FULL;
+    }else if(i == 2){
+        ret.type = M_HALF;
+    }else if(i >= 5 && buf[4] != '\n'){
+        while(fgetc(stdin) != '\n');
+    }
+
     if(i == 4){
         ret.targeted.x = coordToUint(buf[2]);
         ret.targeted.y = coordToUint(buf[3]);
+        ret.type = pairuInBounds(targeted) ? M_FULL : M_INVALID;
     }
     if(i == 2 || i == 4){
         ret.selected.x = coordToUint(buf[0]);
         ret.selected.y = coordToUint(buf[1]);
-    }else if(i >= 5 && buf[4] != '\n')
-        while(fgetc(stdin) != '\n');
+        if(!pairuInBounds(selected)){
+
+        }else{
+            ret.type = M_INVALID;
+        }
+        ret.type = pairuInBounds(targeted) ? M_FULL : M_INVALID;
+    }else
 
     return ret;
 }

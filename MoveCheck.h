@@ -82,10 +82,13 @@ void resetMoves(MoveType moves[8][8])
 
 bool movable(MoveType moves[8][8], const Pairu dst, const Color dstColor, const Color srcColor)
 {
+    if(!pairuInBounds(dst))
+        return false;
     if(dstColor == C_NONE){
         setMoveAt(moves, dst, M_VALID);
         return true;
-    }else if(dstColor != srcColor && pairuInBounds(dst)){
+    }
+    if(dstColor != srcColor){
         setMoveAt(moves, dst, M_CAPTURE);
         return true;
     }
@@ -175,7 +178,7 @@ uint pawnMoves(wc board[8][8], MoveType moves[8][8], const Pairu src)
 
     uint total = 0;
     const Pairu dst1 = shift(src, fDir, 1);
-
+    if(pairuInBounds(dst1) && )
     setMoveAt(moves, dst1, M_VALID);
     Pairu dst2;
     if(pieceColor(getAt(board, (dst2 = shift(dst1, dirRol(fDir), 1)))) == colorInv(srcColor)){
