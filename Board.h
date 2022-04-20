@@ -89,31 +89,24 @@ Move tryReadMove(Move move)
         fwprintf(stderr, L"Error: input\n");
         exit(EXIT_FAILURE);
     }
-    uint i = strnlen(buf, 6);
-    wprintf(L"%i\n", i);
+    const uint i = strnlen(buf, 6);
 
-    if(i==3 || i==6 && buf[i-1] == '\n'){
-        
-    }
+    if(buf[i] == '\n')
+        while(fgetc(stdin) != '\n');
 
 
-    if(i == 2){
-        wprintf(L"2\n");
+    if(i-1 == 2){
         if(move.type == M_HALF){
-            wprintf(L"H\n");
             move.targeted.x = coordToUint(buf[0]);
             move.targeted.y = coordToUint(buf[1]);
             move.type = moveInBounds(move) ? M_VALID : M_INVALID;
         }else if(move.type == M_INVALID){
-            wprintf(L"I\n");
             move.selected.x = coordToUint(buf[0]);
             move.selected.y = coordToUint(buf[1]);
             move.type = pairuInBounds(move.selected) ? M_HALF : M_INVALID;
         }
-    }else if(i == 4){
-        wprintf(L"4\n");
+    }else if(i-1 == 4){
         if(move.type == M_INVALID){
-            wprintf(L"2\n");
             move.selected.x = coordToUint(buf[0]);
             move.selected.y = coordToUint(buf[1]);
             move.targeted.x = coordToUint(buf[2]);
@@ -121,11 +114,9 @@ Move tryReadMove(Move move)
             move.type = moveInBounds(move) ? M_VALID : M_INVALID;
         }
     }else{
-        if(i >= 4)
-            while(fgetc(stdin) != '\n');
+        move.type = M_INVALID;
     }
 
-    printMove(move);
     return move;
 }
 

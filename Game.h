@@ -26,7 +26,11 @@ Color nextTurnColor(const Color current)
 
 bool isValidMove(wc board[8][8], const Color current, const Move move)
 {
-    if(!moveInBounds(move) || eqPairu(move.selected, move.targeted))
+    if(
+        move.type != M_VALID ||
+        !moveInBounds(move) ||
+        eqPairu(move.selected, move.targeted)
+    )
         return false;
     const wc srcPiece = getAt(board, move.selected);
     const wc dstPiece = getAt(board, move.targeted);
@@ -60,7 +64,7 @@ Move getColorsMove(wc board[8][8], const Color current)
 {
     Move move = {.type = M_INVALID};
     do{
-        // clearTerm();
+        clearTerm();
         printTurnLabel(current);
         if(move.type == M_INVALID){
             printBoard(board);

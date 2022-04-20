@@ -104,11 +104,8 @@ uint cast(wc board[8][8], MoveType moves[8][8], const Pairu src, const Algn algn
         return 0;
 
     uint total = 0;
-    uint dirDist = dist;
-    if(!dist){
-        uint const *axis = dirAlgnX(dir) ? &src.x : &src.y;
-        dirDist = dirPos(dir) ? 8 - *axis : *axis;
-    }
+    uint dirDist = dist ? dist : 8;
+
     for(uint i = 1; i < dirDist; i++){
         const Pairu dst = shiftAlgn(src, dir, algn, i);
         if(!pairuInBounds(dst) || !movable(moves, dst, pieceColor(getAt(board, dst)), srcColor))
@@ -177,26 +174,33 @@ uint pawnMoves(wc board[8][8], MoveType moves[8][8], const Pairu src)
     }
 
     uint total = 0;
-    const Pairu dst1 = shift(src, fDir, 1);
-    //if(pairuInBounds(dst1) && )
-    setMoveAt(moves, dst1, M_VALID);
-    Pairu dst2;
-    if(pieceColor(getAt(board, (dst2 = shift(dst1, dirRol(fDir), 1)))) == colorInv(srcColor)){
-        setMoveAt(moves, dst2, M_CAPTURE);
+    const Pairu dst = shift(src, fDir, 1);
+    if(!pairuInBounds(dst))
+        return total;
+    if(getAt(board, dst) == L' '){
+        setMoveAt(moves, dst, M_VALID);
         total++;
-    }
-    if(pieceColor(getAt(board, (dst2 = shift(dst1, dirRor(fDir), 1)))) == colorInv(srcColor)){
-        setMoveAt(moves, dst2, M_CAPTURE);
-        total++;
-    }
-    if(pieceColor(getAt(board, dst1)) == C_NONE){
-        total++;
-        setMoveAt(moves, dst1, M_VALID);
-        if(first && pieceColor(getAt(board, (dst2 = shift(dst1, fDir, 1)))) == C_NONE){
-            setMoveAt(moves, dst2, M_VALID);
-            total++;
+        if(first){
+            const Pairu fDst = shift(src, fDir, 2);
+            if(pairuInBounds(fDst) && getAt(board, fDst) == L' '){
+                setMoveAt(moves, fDst, M_VALID);
+                total++;
+            }
         }
     }
+
+    Pairu cap = shift(dst, dirRol(fDir), 1);
+    if(pairuInBounds(cap) && pieceColor(getAt(board, cap)) == colorInv(srcColor)){
+        setMoveAt(moves, cap, M_CAPTURE);
+        total++;
+    }
+
+    cap = shift(dst, dirRor(fDir), 1);
+    if(pairuInBounds(cap) && pieceColor(getAt(board, cap)) == colorInv(srcColor)){
+        setMoveAt(moves, cap, M_CAPTURE);
+        total++;
+    }
+
     return total;
 }
 
