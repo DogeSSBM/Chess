@@ -58,41 +58,19 @@ bool confirmMove(wc board[8][8], const Color current, const Move move)
 
 Move getColorsMove(wc board[8][8], const Color current)
 {
-    Move move = {
-        .selected.x = 9, .selected.y = 9,
-        .targeted.x = 9, .targeted.y = 9
-    };
-
+    Move move = {.type = M_INVALID};
     do{
-        clearTerm();
+        // clearTerm();
         printTurnLabel(current);
-        printBoard(board);
-        printMovePrompt();
-        move = readMove();
-
-        if(
-            isValidMove(board, current, move) &&
-            confirmMove(board, current, move)
-        )
-            return move;
-
-        while(
-            pairuInBounds(move.selected) &&
-            pieceColor(getAt(board, move.selected)) == current &&
-            !pairuInBounds(move.targeted)
-        ){
-            clearTerm();
-            printTurnLabel(current);
+        if(move.type == M_INVALID){
+            printBoard(board);
+            printMovePrompt();
+        }
+        else if(move.type == M_HALF){
             printBoardS(board, move.selected);
             printTargetPrompt();
-            move = readTarget(move);
-
-            if(
-                isValidMove(board, current, move) &&
-                confirmMove(board, current, move)
-            )
-                return move;
         }
+        move = tryReadMove(move);
     }while(!isValidMove(board, current, move) || !confirmMove(board, current, move));
     return move;
 }

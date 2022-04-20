@@ -67,79 +67,66 @@ Color pieceColor(const wc piece)
     return C_NONE;
 }
 
+void printMove(const Move move)
+{
+    if(move.type == M_HALF)
+        wprintf(L"selected: (%u, %u)\n", move.selected);
+    else if(move.type == M_VALID)
+        wprintf(L"selected: (%u, %u) targeted: (%u, %u)\n", move.selected, move.targeted);
+    else
+        wprintf(L"M_INVALID\n");
+}
+
 bool moveInBounds(const Move move)
 {
     return pairuInBounds(move.selected) && pairuInBounds(move.targeted);
 }
 
-Move readTarget(Move move)
+Move tryReadMove(Move move)
 {
-    move.targeted.x = 9;
-    move.targeted.y = 9;
-    int buf[3] = {'\0'};
-    uint i = 0;
-    while(i < 3){
-        buf[i] = fgetc(stdin);
-        if(buf[i] == '\n')
-            break;
-        i++;
+    char buf[6] = {'\0'};
+    if(!fgets(buf, 6, stdin)){
+        fwprintf(stderr, L"Error: input\n");
+        exit(EXIT_FAILURE);
     }
-    if(i == 0){
-        move.selected.x = 9;
-        move.selected.y = 9;
-        move.targeted.x = 9;
-        move.targeted.y = 9;
-    }else if(i == 2){
-        move.targeted.x = coordToUint(buf[0]);
-        move.targeted.y = coordToUint(buf[1]);
-    }else if(i >= 3 && buf[2] != '\n'){
-        while(fgetc(stdin) != '\n');
+    uint i = strnlen(buf, 6);
+    wprintf(L"%i\n", i);
+
+    if(i==3 || i==6 && buf[i-1] == '\n'){
+        
     }
 
-    return move;
-}
 
-Move readMove(void)
-{
-    Move ret = {
-        .type = M_INVALID;
-        .selected.x = 9, .selected.y = 9,
-        .targeted.x = 9, .targeted.y = 9
-    };
-    int buf[5] = {'\0'};
-    uint i = 0;
-    while(i < 5){
-        buf[i] = fgetc(stdin);
-        if(buf[i] == '\n')
-            break;
-        i++;
-    }
-    
-    if(i == 4){
-        ret.type = M_FULL;
-    }else if(i == 2){
-        ret.type = M_HALF;
-    }else if(i >= 5 && buf[4] != '\n'){
-        while(fgetc(stdin) != '\n');
-    }
-
-    if(i == 4){
-        ret.targeted.x = coordToUint(buf[2]);
-        ret.targeted.y = coordToUint(buf[3]);
-        ret.type = pairuInBounds(targeted) ? M_FULL : M_INVALID;
-    }
-    if(i == 2 || i == 4){
-        ret.selected.x = coordToUint(buf[0]);
-        ret.selected.y = coordToUint(buf[1]);
-        if(!pairuInBounds(selected)){
-
-        }else{
-            ret.type = M_INVALID;
+    if(i == 2){
+        wprintf(L"2\n");
+        if(move.type == M_HALF){
+            wprintf(L"H\n");
+            move.targeted.x = coordToUint(buf[0]);
+            move.targeted.y = coordToUint(buf[1]);
+            move.type = moveInBounds(move) ? M_VALID : M_INVALID;
+        }else if(move.type == M_INVALID){
+            wprintf(L"I\n");
+            move.selected.x = coordToUint(buf[0]);
+            move.selected.y = coordToUint(buf[1]);
+            move.type = pairuInBounds(move.selected) ? M_HALF : M_INVALID;
         }
-        ret.type = pairuInBounds(targeted) ? M_FULL : M_INVALID;
-    }else
+    }else if(i == 4){
+        wprintf(L"4\n");
+        if(move.type == M_INVALID){
+            wprintf(L"2\n");
+            move.selected.x = coordToUint(buf[0]);
+            move.selected.y = coordToUint(buf[1]);
+            move.targeted.x = coordToUint(buf[2]);
+            move.targeted.y = coordToUint(buf[3]);
+            move.type = moveInBounds(move) ? M_VALID : M_INVALID;
+        }
+    }else{
+        if(i >= 4)
+            while(fgetc(stdin) != '\n');
+    }
 
-    return ret;
+    printMove(move);
+    return move;
 }
 
 #endif /* end of include guard: BOARD_H */
