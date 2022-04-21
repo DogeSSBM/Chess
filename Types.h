@@ -49,6 +49,18 @@ typedef struct{
     Pairu targeted;
 }Move;
 
+typedef struct{
+    wc board[8][8];
+    struct{
+        bool moved[8][8];
+        wc captured[16];
+    }white;
+    struct{
+        bool moved[8][8];
+        wc captured[16];
+    }black;
+}Game;
+
 void clearTerm(void)
 {
     wprintf(__extension__(L"\e[1;1H\e[2J"));

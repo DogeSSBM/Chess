@@ -90,7 +90,7 @@ bool movable(MoveType moves[8][8], const Pairu dst, const Color dstColor, const 
     }
     if(dstColor != srcColor){
         setMoveAt(moves, dst, M_CAPTURE);
-        return true;
+        // return true;
     }
     return false;
 }
@@ -108,7 +108,10 @@ uint cast(wc board[8][8], MoveType moves[8][8], const Pairu src, const Algn algn
 
     for(uint i = 1; i < dirDist; i++){
         const Pairu dst = shiftAlgn(src, dir, algn, i);
-        if(!pairuInBounds(dst) || !movable(moves, dst, pieceColor(getAt(board, dst)), srcColor))
+        if(
+            !pairuInBounds(dst) ||
+            !movable(moves, dst, pieceColor(getAt(board, dst)), srcColor)
+        )
             return total;
         total++;
     }

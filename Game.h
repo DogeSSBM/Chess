@@ -9,21 +9,6 @@ bool areCastilable(const wc p1, const wc p2)
             (p1 == L'♚' || p1 == L'♔' || p2 == L'♚' || p2 == L'♔');
 }
 
-Color nextTurnColor(const Color current)
-{
-    if(current == C_WHITE)
-        return C_BLACK;
-
-    else if(current == C_BLACK)
-        return C_WHITE;
-
-    else{
-        fwprintf(stderr, L"Error: current turn color is not valid color\n(int)current == %i\n", (int)current);
-        exit(EXIT_FAILURE);
-    }
-    return C_NONE;
-}
-
 bool isValidMove(wc board[8][8], const Color current, const Move move)
 {
     if(

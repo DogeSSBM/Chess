@@ -14,12 +14,13 @@ int main(void)
         {L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙'},
         {L'♖',L'♘',L'♗',L'♕',L'♔',L'♗',L'♘',L'♖'}
     };
+
     GameState state = S_NEUTRAL;
     Color turn = C_WHITE;
     while(state != S_MATE_W){
         const Move move = getColorsMove(board, turn);
         applyMove(board, move);
-        turn = nextTurnColor(turn);
+        turn = colorInv(turn);
     }
 
     return 0;
