@@ -25,7 +25,7 @@ uint coordToUint(const wc c)
     return 9;
 }
 
-wc getAt(wc board[8][8], const Pairu target)
+wc getAt(Board board, const Pairu target)
 {
     if(!pairuInBounds(target)){
         fwprintf(stderr, L"Error: target (%u, %u) out of bounds\n", target.x, target.y);
@@ -34,7 +34,7 @@ wc getAt(wc board[8][8], const Pairu target)
     return board[target.y][target.x];
 }
 
-wc setAt(wc board[8][8], const Pairu target, const wc piece)
+wc setAt(Board board, const Pairu target, const wc piece)
 {
     if(!pairuInBounds(target)){
         fwprintf(stderr, L"Error: target (%u, %u) out of bounds\n", target.x, target.y);

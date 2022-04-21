@@ -3,11 +3,11 @@
 
 Color pieceColor(const wc);
 
-void showMoves(wc board[8][8], const Pairu select)
+void showMoves(Board board, const Pairu select)
 {
     if(!pairuInBounds(select))
         return;
-    MoveType moves[8][8] = {0};
+    Moves moves = {0};
     findValidMoves(board, moves, select);
     for(int y = 0; y < 8; y++){
         for(int x = 0; x < 8; x++){
@@ -27,9 +27,9 @@ void showMoves(wc board[8][8], const Pairu select)
     fputwc(L'\n',stdout);
 }
 
-void printBoardHelper(wc board[8][8], const bool colors, const Pairu select, const Pairu target)
+void printBoardHelper(Board board, const bool colors, const Pairu select, const Pairu target)
 {
-    // showMoves(board, select);
+    // showMoves(Board board, select);
     fputws(L"    a   b   c   d   e   f   g   h  \n",stdout);
     fputws(L"  +---+---+---+---+---+---+---+---+\n",stdout);
     for(int y = 0; y < 8; y++){
@@ -64,22 +64,22 @@ void printBoardHelper(wc board[8][8], const bool colors, const Pairu select, con
     fputws(L"    a   b   c   d   e   f   g   h  \n",stdout);
 }
 
-void printBoard(wc board[8][8])
+void printBoard(Board board)
 {
     printBoardHelper(board, false, (const Pairu){.x=9,.y=9}, (const Pairu){.x=9,.y=9});
 }
 
-void printBoardS(wc board[8][8], const Pairu selectedPiece)
+void printBoardS(Board board, const Pairu selectedPiece)
 {
     printBoardHelper(board, false, selectedPiece, (const Pairu){.x=9,.y=9});
 }
 
-void printBoardMove(wc board[8][8], const Move move)
+void printBoardMove(Board board, const Move move)
 {
     printBoardHelper(board, false, move.selected, move.targeted);
 }
 
-void printBoardColors(wc board[8][8])
+void printBoardColors(Board board)
 {
     printBoardHelper(board, true, (const Pairu){.x=9,.y=9}, (const Pairu){.x=9,.y=9});
 }

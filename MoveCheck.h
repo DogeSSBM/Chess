@@ -34,7 +34,7 @@ Pairu shiftAlgn(const Pairu target, const Dir dir, const Algn algn, const int di
     return shift2(target, dir, dirRor(dir), dist);
 }
 
-MoveType getMoveAt(MoveType moves[8][8], const Pairu target)
+MoveType getMoveAt(Moves moves, const Pairu target)
 {
     if(!pairuInBounds(target)){
         fwprintf(
@@ -46,7 +46,7 @@ MoveType getMoveAt(MoveType moves[8][8], const Pairu target)
     return moves[target.y][target.x];
 }
 
-void setMoveAt(MoveType moves[8][8], const Pairu target, const MoveType mt)
+void setMoveAt(Moves moves, const Pairu target, const MoveType mt)
 {
     if(!pairuInBounds(target)){
         fwprintf(
@@ -58,7 +58,7 @@ void setMoveAt(MoveType moves[8][8], const Pairu target, const MoveType mt)
     moves[target.y][target.x] = mt;
 }
 
-uint validMoveCount(MoveType moves[8][8])
+uint validMoveCount(Moves moves)
 {
     uint total = 0;
     for(uint y = 0; y < 8; y++){
@@ -70,7 +70,7 @@ uint validMoveCount(MoveType moves[8][8])
     return total;
 }
 
-void resetMoves(MoveType moves[8][8])
+void resetMoves(Moves moves)
 {
     for(uint y = 0; y < 8; y++){
         for(uint x = 0; x < 8; x++){
@@ -80,7 +80,7 @@ void resetMoves(MoveType moves[8][8])
     }
 }
 
-bool movable(MoveType moves[8][8], const Pairu dst, const Color dstColor, const Color srcColor)
+bool movable(Moves moves, const Pairu dst, const Color dstColor, const Color srcColor)
 {
     if(!pairuInBounds(dst))
         return false;
@@ -95,7 +95,7 @@ bool movable(MoveType moves[8][8], const Pairu dst, const Color dstColor, const 
     return false;
 }
 
-uint cast(wc board[8][8], MoveType moves[8][8], const Pairu src, const Algn algn, const Dir dir, const uint dist)
+uint cast(Board board, Moves moves, const Pairu src, const Algn algn, const Dir dir, const uint dist)
 {
     if(!pairuInBounds(src))
         return 0;
@@ -118,7 +118,7 @@ uint cast(wc board[8][8], MoveType moves[8][8], const Pairu src, const Algn algn
     return total;
 }
 
-uint prop(wc board[8][8], MoveType moves[8][8], const Pairu src, const Algn algn, const uint dist)
+uint prop(Board board, Moves moves, const Pairu src, const Algn algn, const uint dist)
 {
     uint total = 0;
     for(Dir i = 0; i < 4; i++)
@@ -127,7 +127,7 @@ uint prop(wc board[8][8], MoveType moves[8][8], const Pairu src, const Algn algn
     return total;
 }
 
-uint knightMoves(wc board[8][8], MoveType moves[8][8], const Pairu src)
+uint knightMoves(Board board, Moves moves, const Pairu src)
 {
     if(!pairuInBounds(src))
         return 0;
@@ -160,7 +160,7 @@ uint knightMoves(wc board[8][8], MoveType moves[8][8], const Pairu src)
     return total;
 }
 
-uint pawnMoves(wc board[8][8], MoveType moves[8][8], const Pairu src)
+uint pawnMoves(Board board, Moves moves, const Pairu src)
 {
     const wc srcPiece = getAt(board, src);
     const Color srcColor = pieceColor(srcPiece);
@@ -207,7 +207,7 @@ uint pawnMoves(wc board[8][8], MoveType moves[8][8], const Pairu src)
     return total;
 }
 
-uint findValidMoves(wc board[8][8], MoveType moves[8][8], const Pairu src)
+uint findValidMoves(Board board, Moves moves, const Pairu src)
 {
     resetMoves(moves);
     switch(getAt(board, src)){

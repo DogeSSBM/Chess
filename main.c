@@ -4,7 +4,7 @@ int main(void)
 {
     setlocale(LC_ALL, "en_US.utf8");
 
-    wc board[8][8] = {
+    Board board = {
         {L'♜',L'♞',L'♝',L'♛',L'♚',L'♝',L'♞',L'♜'},
         {L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟'},
         {L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '},

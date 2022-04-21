@@ -4,6 +4,9 @@
 typedef wchar_t wc;
 typedef unsigned int uint;
 
+typedef wc Board[8][8];
+typedef bool Moves[8][8];
+
 typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;
 typedef enum{C_NONE, C_WHITE, C_BLACK}Color;
 typedef enum{M_INVALID, M_HALF, M_VALID, M_CAPTURE}MoveType;
@@ -50,7 +53,7 @@ typedef struct{
 }Move;
 
 typedef struct{
-    wc board[8][8];
+    Board board;
     struct{
         bool moved[8][8];
         wc captured[16];

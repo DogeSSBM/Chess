@@ -9,7 +9,7 @@ bool areCastilable(const wc p1, const wc p2)
             (p1 == L'♚' || p1 == L'♔' || p2 == L'♚' || p2 == L'♔');
 }
 
-bool isValidMove(wc board[8][8], const Color current, const Move move)
+bool isValidMove(Board board, const Color current, const Move move)
 {
     if(
         move.type != M_VALID ||
@@ -36,7 +36,7 @@ bool getConfirm(void)
     return ans == 'y' || ans == 'Y';
 }
 
-bool confirmMove(wc board[8][8], const Color current, const Move move)
+bool confirmMove(Board board, const Color current, const Move move)
 {
     clearTerm();
     printTurnLabel(current);
@@ -45,7 +45,7 @@ bool confirmMove(wc board[8][8], const Color current, const Move move)
     return getConfirm();
 }
 
-Move getColorsMove(wc board[8][8], const Color current)
+Move getColorsMove(Board board, const Color current)
 {
     Move move = {.type = M_INVALID};
     do{
@@ -64,7 +64,7 @@ Move getColorsMove(wc board[8][8], const Color current)
     return move;
 }
 
-bool applyMove(wc board[8][8], const Move move)
+bool applyMove(Board board, const Move move)
 {
     const wc srcPiece = getAt(board, move.selected);
     const wc dstPiece = setAt(board, move.targeted, srcPiece);
