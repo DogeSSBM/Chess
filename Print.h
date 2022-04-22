@@ -37,15 +37,15 @@ void printBoardHelper(Board board, const bool colors, const Pairu select, const 
         fputws(L" |",stdout);
         for(int x = 0; x < 8; x++){
             const Pairu dst = {.x = x, .y = y};
-            const bool selected = x == select.x && y == select.y;
-            const bool targeted = x == target.x && y == target.y;
+            const bool srcSel = x == select.x && y == select.y;
+            const bool dstSel = x == target.x && y == target.y;
 
             wc l = L' ';
             wc r = L' ';
-            if(selected){
-                l = targeted?L'}':L'[';
-                r = targeted?L'{':L']';
-            }else if(targeted){
+            if(srcSel){
+                l = dstSel?L'}':L'[';
+                r = dstSel?L'{':L']';
+            }else if(dstSel){
                 l = L'>';
                 r = L'<';
             }
@@ -69,14 +69,14 @@ void printBoard(Board board)
     printBoardHelper(board, false, (const Pairu){.x=9,.y=9}, (const Pairu){.x=9,.y=9});
 }
 
-void printBoardS(Board board, const Pairu selectedPiece)
+void printBoardS(Board board, const Pairu srcPiece)
 {
-    printBoardHelper(board, false, selectedPiece, (const Pairu){.x=9,.y=9});
+    printBoardHelper(board, false, srcPiece, (const Pairu){.x=9,.y=9});
 }
 
 void printBoardMove(Board board, const Move move)
 {
-    printBoardHelper(board, false, move.selected, move.targeted);
+    printBoardHelper(board, false, move.src, move.dst);
 }
 
 void printBoardColors(Board board)

@@ -7,28 +7,12 @@ typedef unsigned int uint;
 typedef wc Board[8][8];
 typedef bool Moves[8][8];
 
-typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;
+typedef enum{S_NEUTRAL, S_CHECK, S_MATE}GameState;
 typedef enum{C_NONE, C_WHITE, C_BLACK}Color;
-typedef enum{M_INVALID, M_HALF, M_VALID, M_CAPTURE}MoveType;
+typedef enum{M_INVALID, M_HALF, M_VALID, M_CAPTURE, M_PROMOTE, M_CASTLE}MoveType;
 typedef enum{A_ADJ, A_DAG}Algn;
 typedef enum{D_U, D_R, D_D, D_L, D_N}Dir;
 typedef enum{P_DEFAULT, P_COLORS, P_MOVES}PrintType;
-
-typedef union{
-    int arr[2];
-    struct{
-        int x;
-        int y;
-    };
-    struct{
-        int col;
-        int row;
-    };
-    struct{
-        int w;
-        int h;
-    };
-}Pairs;
 
 typedef union{
     uint arr[2];
@@ -48,9 +32,16 @@ typedef union{
 
 typedef struct{
     MoveType type;
-    Pairu selected;
-    Pairu targeted;
+    Pairu src;
+    Pairu dst;
 }Move;
+
+typedef struct Turn{
+    GameState state;
+    Move move;
+    Color player;
+    struct Turn *next;
+}Turn;
 
 typedef struct{
     Board board;
@@ -70,11 +61,6 @@ void clearTerm(void)
 }
 
 bool eqPairu(const Pairu p1, const Pairu p2)
-{
-    return p1.x == p2.x && p1.y == p2.y;
-}
-
-bool eqPairs(const Pairs p1, const Pairs p2)
 {
     return p1.x == p2.x && p1.y == p2.y;
 }

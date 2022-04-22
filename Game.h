@@ -13,14 +13,14 @@ bool isValidMove(Board board, const Color current, const Move move)
 {
     if(
         !moveInBounds(move) ||
-        pieceColor(getAt(board, move.selected)) != current ||
-        eqPairu(move.selected, move.targeted)
+        pieceColor(getAt(board, move.src)) != current ||
+        eqPairu(move.src, move.dst)
     )
         return false;
 
     Moves moves = {0};
-    findValidMoves(board, moves, move.selected);
-    return getMoveAt(moves, move.targeted) != M_INVALID;
+    findValidMoves(board, moves, move.src);
+    return getMoveAt(moves, move.dst) != M_INVALID;
 }
 
 bool getConfirm(void)
@@ -50,7 +50,7 @@ Move getColorsMove(Board board, const Color current)
         clearTerm();
         printTurnLabel(current);
         if(move.type == M_HALF){
-            printBoardS(board, move.selected);
+            printBoardS(board, move.src);
             printTargetPrompt();
         }else{
             move.type = M_INVALID;
@@ -58,7 +58,7 @@ Move getColorsMove(Board board, const Color current)
             printMovePrompt();
         }
         move = tryReadMove(move);
-        if(move.type != M_INVALID && pieceColor(getAt(board, move.selected)) != current)
+        if(move.type != M_INVALID && pieceColor(getAt(board, move.src)) != current)
             move.type = M_INVALID;
         printMove(move);
     }while(
@@ -70,12 +70,12 @@ Move getColorsMove(Board board, const Color current)
 
 bool applyMove(Board board, const Move move)
 {
-    const wc srcPiece = getAt(board, move.selected);
-    const wc dstPiece = setAt(board, move.targeted, srcPiece);
+    const wc srcPiece = getAt(board, move.src);
+    const wc dstPiece = setAt(board, move.dst, srcPiece);
     // if(areCastilable(srcPiece, dstPiece))
-    //     setAt(board, move.selected, dstPiece);
+    //     setAt(board, move.src, dstPiece);
     // else
-        setAt(board, move.selected, L' ');
+        setAt(board, move.src, L' ');
     return true;
 }
 

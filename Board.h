@@ -70,16 +70,16 @@ Color pieceColor(const wc piece)
 void printMove(const Move move)
 {
     if(move.type == M_HALF)
-        wprintf(L"selected: (%u, %u)\n", move.selected.x, move.selected.y);
+        wprintf(L"src: (%u, %u)\n", move.src.x, move.src.y);
     else if(move.type == M_VALID)
-        wprintf(L"selected: (%u, %u) targeted: (%u, %u)\n", move.selected.x, move.selected.y, move.targeted.x, move.targeted.y);
+        wprintf(L"src: (%u, %u) dst: (%u, %u)\n", move.src.x, move.src.y, move.dst.x, move.dst.y);
     else
         wprintf(L"M_INVALID\n");
 }
 
 bool moveInBounds(const Move move)
 {
-    return pairuInBounds(move.selected) && pairuInBounds(move.targeted);
+    return pairuInBounds(move.src) && pairuInBounds(move.dst);
 }
 
 Move tryReadMove(Move move)
@@ -97,20 +97,20 @@ Move tryReadMove(Move move)
 
     if(i-1 == 2){
         if(move.type == M_INVALID){
-            move.selected.x = coordToUint(buf[0]);
-            move.selected.y = coordToUint(buf[1]);
-            move.type = pairuInBounds(move.selected) ? M_HALF : M_INVALID;
+            move.src.x = coordToUint(buf[0]);
+            move.src.y = coordToUint(buf[1]);
+            move.type = pairuInBounds(move.src) ? M_HALF : M_INVALID;
         }else if(move.type == M_HALF){
-            move.targeted.x = coordToUint(buf[0]);
-            move.targeted.y = coordToUint(buf[1]);
+            move.dst.x = coordToUint(buf[0]);
+            move.dst.y = coordToUint(buf[1]);
             move.type = moveInBounds(move) ? M_VALID : M_INVALID;
         }
     }else if(i-1 == 4){
         if(move.type == M_INVALID){
-            move.selected.x = coordToUint(buf[0]);
-            move.selected.y = coordToUint(buf[1]);
-            move.targeted.x = coordToUint(buf[2]);
-            move.targeted.y = coordToUint(buf[3]);
+            move.src.x = coordToUint(buf[0]);
+            move.src.y = coordToUint(buf[1]);
+            move.dst.x = coordToUint(buf[2]);
+            move.dst.y = coordToUint(buf[3]);
             move.type = moveInBounds(move) ? M_VALID : M_INVALID;
         }
     }else{
