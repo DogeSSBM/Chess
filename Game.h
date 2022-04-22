@@ -9,10 +9,11 @@ bool areCastilable(const wc p1, const wc p2)
             (p1 == L'♚' || p1 == L'♔' || p2 == L'♚' || p2 == L'♔');
 }
 
-bool isValidMove(Board board, const Move move)
+bool isValidMove(Board board, const Color current, const Move move)
 {
     if(
         !moveInBounds(move) ||
+        pieceColor(getAt(board, move.selected)) != current ||
         eqPairu(move.selected, move.targeted)
     )
         return false;
@@ -57,10 +58,11 @@ Move getColorsMove(Board board, const Color current)
             printMovePrompt();
         }
         move = tryReadMove(move);
-
+        if(move.type != M_INVALID && pieceColor(getAt(board, move.selected)) != current)
+            move.type = M_INVALID;
         printMove(move);
     }while(
-        !isValidMove(board, move) ||
+        !isValidMove(board, current, move) ||
         !confirmMove(board, current, move)
     );
     return move;
