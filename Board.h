@@ -70,9 +70,9 @@ Color pieceColor(const wc piece)
 void printMove(const Move move)
 {
     if(move.type == M_HALF)
-        wprintf(L"selected: (%u, %u)\n", move.selected);
+        wprintf(L"selected: (%u, %u)\n", move.selected.x, move.selected.y);
     else if(move.type == M_VALID)
-        wprintf(L"selected: (%u, %u) targeted: (%u, %u)\n", move.selected, move.targeted);
+        wprintf(L"selected: (%u, %u) targeted: (%u, %u)\n", move.selected.x, move.selected.y, move.targeted.x, move.targeted.y);
     else
         wprintf(L"M_INVALID\n");
 }
@@ -96,14 +96,14 @@ Move tryReadMove(Move move)
 
 
     if(i-1 == 2){
-        if(move.type == M_HALF){
-            move.targeted.x = coordToUint(buf[0]);
-            move.targeted.y = coordToUint(buf[1]);
-            move.type = moveInBounds(move) ? M_VALID : M_INVALID;
-        }else if(move.type == M_INVALID){
+        if(move.type == M_INVALID){
             move.selected.x = coordToUint(buf[0]);
             move.selected.y = coordToUint(buf[1]);
             move.type = pairuInBounds(move.selected) ? M_HALF : M_INVALID;
+        }else if(move.type == M_HALF){
+            move.targeted.x = coordToUint(buf[0]);
+            move.targeted.y = coordToUint(buf[1]);
+            move.type = moveInBounds(move) ? M_VALID : M_INVALID;
         }
     }else if(i-1 == 4){
         if(move.type == M_INVALID){

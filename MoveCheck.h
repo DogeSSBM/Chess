@@ -121,7 +121,7 @@ uint cast(Board board, Moves moves, const Pairu src, const Algn algn, const Dir 
 uint prop(Board board, Moves moves, const Pairu src, const Algn algn, const uint dist)
 {
     uint total = 0;
-    for(Dir i = 0; i < 4; i++)
+    for(Dir i = D_U; i < D_N; i++)
         total += cast(board, moves, src, algn, i, dist);
 
     return total;
@@ -207,35 +207,35 @@ uint pawnMoves(Board board, Moves moves, const Pairu src)
     return total;
 }
 
-uint findValidMoves(Board board, Moves moves, const Pairu src)
+uint findValidMoves(Board board, Moves moves, const Pairu target)
 {
     resetMoves(moves);
-    switch(getAt(board, src)){
+    switch(getAt(board, target)){
         case L'♜':
         case L'♖':
-            prop(board, moves, src, A_ADJ, 0);
+            prop(board, moves, target, A_ADJ, 0);
             break;
         case L'♞':
         case L'♘':
-            knightMoves(board, moves, src);
+            knightMoves(board, moves, target);
             break;
         case L'♝':
         case L'♗':
-            prop(board, moves, src, A_DAG, 0);
+            prop(board, moves, target, A_DAG, 0);
             break;
         case L'♛':
         case L'♕':
-            prop(board, moves, src, A_DAG, 0);
-            prop(board, moves, src, A_ADJ, 0);
+            prop(board, moves, target, A_DAG, 0);
+            prop(board, moves, target, A_ADJ, 0);
             break;
         case L'♚':
         case L'♔':
-            prop(board, moves, src, A_DAG, 1);
-            prop(board, moves, src, A_ADJ, 1);
+            prop(board, moves, target, A_DAG, 1);
+            prop(board, moves, target, A_ADJ, 1);
             break;
         case L'♟':
         case L'♙':
-            pawnMoves(board, moves, src);
+            pawnMoves(board, moves, target);
             break;
         case L' ':
         default:

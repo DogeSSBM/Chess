@@ -9,21 +9,17 @@ bool areCastilable(const wc p1, const wc p2)
             (p1 == L'♚' || p1 == L'♔' || p2 == L'♚' || p2 == L'♔');
 }
 
-bool isValidMove(Board board, const Color current, const Move move)
+bool isValidMove(Board board, const Move move)
 {
     if(
-        move.type != M_VALID ||
         !moveInBounds(move) ||
         eqPairu(move.selected, move.targeted)
     )
         return false;
-    const wc srcPiece = getAt(board, move.selected);
-    const wc dstPiece = getAt(board, move.targeted);
-    if(srcPiece == L' ' || pieceColor(srcPiece) != current)
-        return false;
-    if(pieceColor(dstPiece) == current)
-        return areCastilable(srcPiece, dstPiece);
-    return true;
+
+    Moves moves = {0};
+    findValidMoves(board, moves, move.selected);
+    return getMoveAt(moves, move.targeted) != M_INVALID;
 }
 
 bool getConfirm(void)
@@ -47,20 +43,26 @@ bool confirmMove(Board board, const Color current, const Move move)
 
 Move getColorsMove(Board board, const Color current)
 {
+    Moves moves = {0};
     Move move = {.type = M_INVALID};
     do{
         clearTerm();
         printTurnLabel(current);
-        if(move.type == M_INVALID){
+        if(move.type == M_HALF){
+            printBoardS(board, move.selected);
+            printTargetPrompt();
+        }else{
+            move.type = M_INVALID;
             printBoard(board);
             printMovePrompt();
         }
-        else if(move.type == M_HALF){
-            printBoardS(board, move.selected);
-            printTargetPrompt();
-        }
         move = tryReadMove(move);
-    }while(!isValidMove(board, current, move) || !confirmMove(board, current, move));
+
+        printMove(move);
+    }while(
+        !isValidMove(board, move) ||
+        !confirmMove(board, current, move)
+    );
     return move;
 }
 

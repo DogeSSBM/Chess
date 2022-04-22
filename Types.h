@@ -11,7 +11,7 @@ typedef enum{S_NEUTRAL, S_CHECK_W, S_CHECK_B, S_MATE_W, S_MATE_B}GameState;
 typedef enum{C_NONE, C_WHITE, C_BLACK}Color;
 typedef enum{M_INVALID, M_HALF, M_VALID, M_CAPTURE}MoveType;
 typedef enum{A_ADJ, A_DAG}Algn;
-typedef enum{D_U, D_R, D_D, D_L}Dir;
+typedef enum{D_U, D_R, D_D, D_L, D_N}Dir;
 typedef enum{P_DEFAULT, P_COLORS, P_MOVES}PrintType;
 
 typedef union{
