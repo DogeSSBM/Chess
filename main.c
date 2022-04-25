@@ -15,13 +15,11 @@ int main(void)
         {L'♖',L'♘',L'♗',L'♕',L'♔',L'♗',L'♘',L'♖'}
     };
 
-    GameState state = S_NEUTRAL;
     Color turn = C_WHITE;
     Turn *game = NULL;
     do{
-        const Move move = getColorsMove(board, turn);
-        game = appendTurn(game, makeTurn(board, move));
-        applyMove(board, move);
+        const Move move = getColorsMove(board, game, turn);
+        game = applyMove(board, game, move);
         turn = colorInv(turn);
     }while(lastTurn(game)->state != S_MATE);
 

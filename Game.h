@@ -9,7 +9,7 @@ bool areCastilable(const wc p1, const wc p2)
             (p1 == L'♚' || p1 == L'♔' || p2 == L'♚' || p2 == L'♔');
 }
 
-bool isValidMove(Board board, const Color current, const Move move)
+bool isValidMove(Board board, Turn *game, const Color current, const Move move)
 {
     if(
         !moveInBounds(move) ||
@@ -19,7 +19,7 @@ bool isValidMove(Board board, const Color current, const Move move)
         return false;
 
     Moves moves = {0};
-    findValidMoves(board, moves, move.src);
+    findValidMoves(board, game, moves, move.src);
     return getMoveAt(moves, move.dst) != M_INVALID;
 }
 
@@ -42,9 +42,8 @@ bool confirmMove(Board board, const Color current, const Move move)
     return getConfirm();
 }
 
-Move getColorsMove(Board board, const Color current)
+Move getColorsMove(Board board, Turn *game, const Color current)
 {
-    Moves moves = {0};
     Move move = {.type = M_INVALID};
     do{
         clearTerm();
@@ -62,21 +61,10 @@ Move getColorsMove(Board board, const Color current)
             move.type = M_INVALID;
         printMove(move);
     }while(
-        !isValidMove(board, current, move) ||
+        !isValidMove(board, game, current, move) ||
         !confirmMove(board, current, move)
     );
     return move;
-}
-
-bool applyMove(Board board, const Move move)
-{
-    const wc srcPiece = getAt(board, move.src);
-    const wc dstPiece = setAt(board, move.dst, srcPiece);
-    // if(areCastilable(srcPiece, dstPiece))
-    //     setAt(board, move.src, dstPiece);
-    // else
-        setAt(board, move.src, L' ');
-    return true;
 }
 
 #endif /* end of include guard: GAME_H */

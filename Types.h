@@ -39,21 +39,8 @@ typedef struct{
 typedef struct Turn{
     GameState state;
     Move move;
-    Color player;
     struct Turn *next;
 }Turn;
-
-typedef struct{
-    Board board;
-    struct{
-        bool moved[8][8];
-        wc captured[16];
-    }white;
-    struct{
-        bool moved[8][8];
-        wc captured[16];
-    }black;
-}Game;
 
 void clearTerm(void)
 {

@@ -160,7 +160,7 @@ uint knightMoves(Board board, Moves moves, const Pairu src)
     return total;
 }
 
-uint pawnMoves(Board board, Moves moves, const Pairu src)
+uint pawnMoves(Board board, Turn *game, Moves moves, const Pairu src)
 {
     const wc srcPiece = getAt(board, src);
     const Color srcColor = pieceColor(srcPiece);
@@ -207,7 +207,7 @@ uint pawnMoves(Board board, Moves moves, const Pairu src)
     return total;
 }
 
-uint findValidMoves(Board board, Moves moves, const Pairu target)
+uint findValidMoves(Board board, Turn *game, Moves moves, const Pairu target)
 {
     resetMoves(moves);
     switch(getAt(board, target)){
@@ -235,7 +235,7 @@ uint findValidMoves(Board board, Moves moves, const Pairu target)
             break;
         case L'♟':
         case L'♙':
-            pawnMoves(board, moves, target);
+            pawnMoves(board, game, moves, target);
             break;
         case L' ':
         default:

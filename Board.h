@@ -1,6 +1,12 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+size_t strnlen(const char* str, const size_t max)
+{
+  const char* end = memchr(str, '\0', max);
+  return end ? (size_t)(end-str) : max;
+}
+
 bool pairuInBounds(const Pairu target)
 {
     return target.x < 8 && target.y < 8;

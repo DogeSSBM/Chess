@@ -5,6 +5,8 @@ Turn* appendTurn(Turn *head, Turn *tail)
 {
     if(!head)
         return tail;
+    if(!tail)
+        return head;
     Turn *turn = head;
     while(turn->next)
         turn = turn->next;
@@ -30,9 +32,9 @@ void freeGame(Turn *game)
     }
 }
 
-Turn* makeTurn(Board board, Move move)
+Turn* makeTurn(Board board, const Move move)
 {
-    Turn *turn = calloc(1, sizeof(turn));
+    Turn *turn = calloc(1, sizeof(Turn));
     if(!turn){
         fwprintf(stderr, L"Error: could not calloc for next turn\n");
         exit(EXIT_FAILURE);
@@ -40,6 +42,15 @@ Turn* makeTurn(Board board, Move move)
     turn->state = S_NEUTRAL;
     turn->move = move;
     return turn;
+}
+
+Turn* applyMove(Board board, Turn *game, const Move move)
+{
+    const wc srcPiece = getAt(board, move.src);
+    setAt(board, move.dst, srcPiece);
+    // const wc dstPiece = setAt(board, move.dst, srcPiece);
+        setAt(board, move.src, L' ');
+    return appendTurn(game, makeTurn(board, move));
 }
 
 #endif /* end of include guard: TURN_H */
