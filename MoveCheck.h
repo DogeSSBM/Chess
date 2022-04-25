@@ -127,6 +127,34 @@ uint prop(Board board, Moves moves, const Pairu src, const Algn algn, const uint
     return total;
 }
 
+Turn* applyTurn(Board, Turn *); // i know... this is hax
+bool hasMoved(const Pairu src, Turn *game)
+{
+    if(!game)
+        return false;
+    Board board;
+    resetBoard(board);
+    const wc piece = getAt(board, src);
+    do{
+        if(getAt(board, src) != piece)
+            return true;
+    }while((game = applyTurn(board, game)));
+    return false;
+}
+
+bool hasCastled(Turn *game, const Color color)
+{
+    if(!game)
+        return false;
+    Color prvColor = C_WHITE;
+    do{
+        if(game->move.type == M_CASTLE && color == prvColor)
+            return true;
+        prvColor = colorInv(prvColor);
+    }while((game = game->next));
+    return false;
+}
+
 uint knightMoves(Board board, Moves moves, const Pairu src)
 {
     if(!pairuInBounds(src))
@@ -158,6 +186,19 @@ uint knightMoves(Board board, Moves moves, const Pairu src)
             total += movable(moves, dst, pieceColor(getAt(board,dst)), srcColor);
     }
     return total;
+}
+
+uint rookMoves(Board board, Turn *game, Moves moves, const Pairu src)
+{
+    return prop(board, moves, src, A_ADJ, 0);
+    // const wc srcPiece = getAt(board, src);
+    // const Color srcColor = pieceColor(srcPiece);
+    // const Pairu dst = getKing(board, srcColor);
+    // if(
+    //     !hasCastled(game, srcColor) &&
+    //     !hasMoved(src, game) &&
+    //     !hasMoved(dst, game)
+    // )
 }
 
 uint pawnMoves(Board board, Turn *game, Moves moves, const Pairu src)
@@ -207,35 +248,37 @@ uint pawnMoves(Board board, Turn *game, Moves moves, const Pairu src)
     return total;
 }
 
-uint findValidMoves(Board board, Turn *game, Moves moves, const Pairu target)
+uint findValidMoves(Board board, Turn *game, Moves moves, const Pairu src)
 {
     resetMoves(moves);
-    switch(getAt(board, target)){
+    const wc srcPiece = getAt(board, src);
+    // const Color srcColor = pieceColor(srcPiece);
+    switch(srcPiece){
         case L'♜':
         case L'♖':
-            prop(board, moves, target, A_ADJ, 0);
+            rookMoves(board, game, moves, src);
             break;
         case L'♞':
         case L'♘':
-            knightMoves(board, moves, target);
+            knightMoves(board, moves, src);
             break;
         case L'♝':
         case L'♗':
-            prop(board, moves, target, A_DAG, 0);
+            prop(board, moves, src, A_DAG, 0);
             break;
         case L'♛':
         case L'♕':
-            prop(board, moves, target, A_DAG, 0);
-            prop(board, moves, target, A_ADJ, 0);
+            prop(board, moves, src, A_DAG, 0);
+            prop(board, moves, src, A_ADJ, 0);
             break;
         case L'♚':
         case L'♔':
-            prop(board, moves, target, A_DAG, 1);
-            prop(board, moves, target, A_ADJ, 1);
+            prop(board, moves, src, A_DAG, 1);
+            prop(board, moves, src, A_ADJ, 1);
             break;
         case L'♟':
         case L'♙':
-            pawnMoves(board, game, moves, target);
+            pawnMoves(board, game, moves, src);
             break;
         case L' ':
         default:

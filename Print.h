@@ -3,30 +3,6 @@
 
 Color pieceColor(const wc);
 
-// void showMoves(Board board, const Pairu select)
-// {
-//     if(!pairuInBounds(select))
-//         return;
-//     Moves moves = {0};
-//     findValidMoves(board, moves, select);
-//     for(int y = 0; y < 8; y++){
-//         for(int x = 0; x < 8; x++){
-//             const Pairu dst = {.x = x, .y = y};
-//             MoveType mt = getMoveAt(moves, dst);
-//             if(select.x == x && select.y == y)
-//                 fputwc(getAt(board, select), stdout);
-//             else if(mt == M_INVALID)
-//                 fputwc(L'#' ,stdout);
-//             else if(mt == M_VALID)
-//                 fputwc(L' ' ,stdout);
-//             else if(mt == M_CAPTURE)
-//                 fputwc(L'!' ,stdout);
-//         }
-//         fputwc(L'\n',stdout);
-//     }
-//     fputwc(L'\n',stdout);
-// }
-
 void printBoardHelper(Board board, const bool colors, const Pairu select, const Pairu target)
 {
     // showMoves(Board board, select);

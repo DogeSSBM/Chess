@@ -31,6 +31,18 @@ uint coordToUint(const wc c)
     return 9;
 }
 
+void resetBoard(Board board)
+{
+    memcpy(board[0], (wc[8]){L'♜',L'♞',L'♝',L'♛',L'♚',L'♝',L'♞',L'♜'}, sizeof(wc)*8);
+    memcpy(board[1], (wc[8]){L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟'}, sizeof(wc)*8);
+    memcpy(board[2], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
+    memcpy(board[3], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
+    memcpy(board[4], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
+    memcpy(board[5], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
+    memcpy(board[6], (wc[8]){L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙'}, sizeof(wc)*8);
+    memcpy(board[7], (wc[8]){L'♖',L'♘',L'♗',L'♕',L'♔',L'♗',L'♘',L'♖'}, sizeof(wc)*8);
+}
+
 wc getAt(Board board, const Pairu target)
 {
     if(!pairuInBounds(target)){
@@ -71,6 +83,21 @@ Color pieceColor(const wc piece)
     }
 
     return C_NONE;
+}
+
+Pairu getKing(Board board, const Color color)
+{
+    const wc dstPiece = color == C_WHITE ? L'♚' : L'♔';
+    for(uint y = 0; y < 8; y++){
+        for(uint x = 0; x < 8; x++){
+            const Pairu src = {.x=x, .y=y};
+            if(getAt(board, src) == dstPiece)
+                return src;
+        }
+    }
+    fwprintf(stderr, L"Error: unable to find king\n");
+    exit(EXIT_FAILURE);
+    return (const Pairu){.x=0,.y=0};
 }
 
 void printMove(const Move move)

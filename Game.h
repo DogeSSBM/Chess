@@ -42,6 +42,7 @@ bool confirmMove(Board board, const Color current, const Move move)
     return getConfirm();
 }
 
+// Turn* lastTurn(Turn *); // i know... this is hax
 Move getColorsMove(Board board, Turn *game, const Color current)
 {
     Move move = {.type = M_INVALID};
@@ -59,7 +60,6 @@ Move getColorsMove(Board board, Turn *game, const Color current)
         move = tryReadMove(move);
         if(move.type != M_INVALID && pieceColor(getAt(board, move.src)) != current)
             move.type = M_INVALID;
-        printMove(move);
     }while(
         !isValidMove(board, game, current, move) ||
         !confirmMove(board, current, move)
