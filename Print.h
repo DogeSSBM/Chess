@@ -5,7 +5,6 @@ Color pieceColor(const wc);
 
 void printBoardHelper(Board board, const bool colors, const Pairu select, const Pairu target)
 {
-    // showMoves(Board board, select);
     fputws(L"    a   b   c   d   e   f   g   h  \n",stdout);
     fputws(L"  +---+---+---+---+---+---+---+---+\n",stdout);
     for(int y = 0; y < 8; y++){

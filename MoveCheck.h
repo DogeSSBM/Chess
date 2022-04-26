@@ -188,20 +188,84 @@ uint knightMoves(Board board, Moves moves, const Pairu src)
     return total;
 }
 
-uint rookMoves(Board board, Turn *game, Moves moves, const Pairu src)
+Algn posAlgn(const Pairu src, const Pairu dst)
 {
-    return prop(board, moves, src, A_ADJ, 0);
-    // const wc srcPiece = getAt(board, src);
-    // const Color srcColor = pieceColor(srcPiece);
-    // const Pairu dst = getKing(board, srcColor);
-    // if(
-    //     !hasCastled(game, srcColor) &&
-    //     !hasMoved(src, game) &&
-    //     !hasMoved(dst, game)
-    // )
+    if(eqPairu(src, dst))
+        return A_INVALID;
+
+    const Pairu dif = pairuAbsDif(src, dst);
+    if(dif.x == dif.y)
+        return A_DAG;
+
+    if(minu(dif.x, dif.y) == 0)
+        return A_ADJ;
+
+    return A_INVALID;
 }
 
-uint pawnMoves(Board board, Turn *game, Moves moves, const Pairu src)
+uint findValidMoves(Board, Turn *, Moves, const Pairu); // moar hax
+bool inCheck(Board board, const Color color)
+{
+    if(color == C_NONE)
+        return false;
+    const Pairu kingPos = getKing(board, color);
+    const wc kingPiece = color == C_WHITE ? L'♚' : L'♔';
+    for(uint y = 0; y < 8; y++){
+        for(uint x = 0; x < 8; x++){
+            const Pairu pos = {.x=x, .y=y};
+            const wc piece = getAt(board, pos);
+            if(piece == L' ' || color == pieceColor(piece)|| piece == kingPiece)
+                continue;
+            Moves moves = {0};
+            findValidMoves(board, NULL, moves, pos);
+            if(getMoveAt(moves, kingPos) == M_CAPTURE)
+                return true;
+        }
+    }
+    return false;
+}
+
+bool areCastilable(const wc p1, const wc p2)
+{
+    return  (p1 != p2) &&
+            (pieceColor(p1) == pieceColor(p2)) &&
+            (p1 == L'♜' || p1 == L'♖' || p2 == L'♜' || p2 == L'♖') &&
+            (p1 == L'♚' || p1 == L'♔' || p2 == L'♚' || p2 == L'♔');
+}
+
+// src < dst < src
+//  ♖ L  ♔  R  ♖
+void castlingMove(Board board, Turn *game, Moves moves, const Pairu src)
+{
+    const wc srcPiece = getAt(board, src);
+    const Color srcColor = pieceColor(srcPiece);
+    const Pairu dst = getKing(board, srcColor);
+    const wc dstPiece = srcColor == C_WHITE ? L'♚' : L'♔';
+    if(
+        areCastilable(srcPiece, dstPiece) &&
+        !hasCastled(game, srcColor) &&
+        !hasMoved(src, game) &&
+        !hasMoved(dst, game)
+    ){
+        const Dir dir = dst.x < src.x ? D_R : D_L;
+
+        bool clear = true;
+        for(Pairu step = shift(src, dir, 1); !eqPairu(dst, step); step = shift(step, dir, 1)){
+            if(getAt(board, step) != L' '){
+                clear = false;
+                break;
+            }
+            Board stepState;
+            cpyBoard(stepState, board);
+            setAt(stepState, src, L' ');
+            setAt(stepState, step, dstPiece);
+        }
+        if(clear)
+            setMoveAt(moves, dst, M_CASTLE);
+    }
+}
+
+uint pawnMoves(Board board, Moves moves, const Pairu src)
 {
     const wc srcPiece = getAt(board, src);
     const Color srcColor = pieceColor(srcPiece);
@@ -248,15 +312,52 @@ uint pawnMoves(Board board, Turn *game, Moves moves, const Pairu src)
     return total;
 }
 
+Turn* lastTurn(Turn *); // yeah yeah, moar hax
+void enPassant(Board board, Turn *game, Moves moves, const Pairu src)
+{
+    if(!game)
+        return;
+
+    const wc srcPiece = getAt(board, src);
+    Turn *prvTurn = lastTurn(game);
+    const Pairu prvDst = prvTurn->move.dst;
+    const Pairu prvSrc = prvTurn->move.src;
+    const wc prvPiece = getAt(board, prvDst);
+    if(prvDst.x != prvSrc.x)
+        return;
+    Dir fDir = D_INVALID;
+    if(
+        srcPiece == L'♟' && src.y == 4 &&
+        prvPiece == L'♙' && prvSrc.y == 6 &&
+        prvDst.y == 4
+    )
+        fDir = D_D;
+    else if(
+        srcPiece == L'♙' && src.y == 3 &&
+        prvPiece == L'♟' && prvSrc.y == 1 &&
+        prvDst.y == 3
+    )
+        fDir = D_U;
+    else
+        return;
+
+    Pairu target;
+    if(src.x < 7 && eqPairu((target = shift2(src, fDir, D_R, 1)), prvDst))
+        setMoveAt(moves, target, M_PASSANT);
+    else if(src.x > 0 && eqPairu((target = shift2(src, fDir, D_L, 1)), prvDst))
+        setMoveAt(moves, target, M_PASSANT);
+}
+
 uint findValidMoves(Board board, Turn *game, Moves moves, const Pairu src)
 {
     resetMoves(moves);
     const wc srcPiece = getAt(board, src);
-    // const Color srcColor = pieceColor(srcPiece);
     switch(srcPiece){
         case L'♜':
         case L'♖':
-            rookMoves(board, game, moves, src);
+            if(game)
+                castlingMove(board, game, moves, src);
+            prop(board, moves, src, A_ADJ, 0);
             break;
         case L'♞':
         case L'♘':
@@ -278,7 +379,9 @@ uint findValidMoves(Board board, Turn *game, Moves moves, const Pairu src)
             break;
         case L'♟':
         case L'♙':
-            pawnMoves(board, game, moves, src);
+            if(game)
+                enPassant(board, game, moves, src);
+            pawnMoves(board, moves, src);
             break;
         case L' ':
         default:

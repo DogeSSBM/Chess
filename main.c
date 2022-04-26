@@ -7,14 +7,14 @@ int main(void)
     Board board;
     resetBoard(board);
 
-    Color curColor = C_WHITE;
+    Color curColor = C_BLACK;
     Turn *game = NULL;
     do{
-        printGame(game);
         const Move move = getColorsMove(board, game, curColor);
         game = makeMove(board, game, move);
         curColor = colorInv(curColor);
     }while(lastTurn(game)->state != S_MATE);
-
+    printGame(game);
+    freeGame(game);
     return 0;
 }

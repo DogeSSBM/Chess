@@ -14,9 +14,6 @@ Castling
 out of, through, or into check
 -Move king 2 squares towards rook
 -Place rook on square crossed by king
-♜   ♚...
-♜ ♚  ...
-- ♚♜...
 
 En passant
 -If a pawn moves 2 squares

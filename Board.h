@@ -37,10 +37,16 @@ void resetBoard(Board board)
     memcpy(board[1], (wc[8]){L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟'}, sizeof(wc)*8);
     memcpy(board[2], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
     memcpy(board[3], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
-    memcpy(board[4], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
+    memcpy(board[4], (wc[8]){L'♟',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
     memcpy(board[5], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
     memcpy(board[6], (wc[8]){L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙'}, sizeof(wc)*8);
     memcpy(board[7], (wc[8]){L'♖',L'♘',L'♗',L'♕',L'♔',L'♗',L'♘',L'♖'}, sizeof(wc)*8);
+}
+
+void cpyBoard(Board dst, Board src)
+{
+    for(uint i = 0; i < 8; i++)
+        memcpy(dst[i], src[i], sizeof(wc)*8);
 }
 
 wc getAt(Board board, const Pairu target)
@@ -102,12 +108,12 @@ Pairu getKing(Board board, const Color color)
 
 void printMove(const Move move)
 {
+    wprintf(L"%ls ", MoveTypeStr[move.type]);
     if(move.type == M_HALF)
         wprintf(L"src: (%u, %u)\n", move.src.x, move.src.y);
-    else if(move.type == M_VALID)
-        wprintf(L"src: (%u, %u) dst: (%u, %u)\n", move.src.x, move.src.y, move.dst.x, move.dst.y);
-    else
-        wprintf(L"M_INVALID\n");
+    else if(move.type == M_INVALID)
+        wprintf(L"\n");
+    wprintf(L"src: (%u, %u) dst: (%u, %u)\n", move.src.x, move.src.y, move.dst.x, move.dst.y);
 }
 
 bool moveInBounds(const Move move)

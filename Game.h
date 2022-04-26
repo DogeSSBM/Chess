@@ -1,26 +1,20 @@
 #ifndef GAME_H
 #define GAME_H
 
-bool areCastilable(const wc p1, const wc p2)
-{
-    return  (p1 != p2) &&
-            (pieceColor(p1) == pieceColor(p2)) &&
-            (p1 == L'♜' || p1 == L'♖' || p2 == L'♜' || p2 == L'♖') &&
-            (p1 == L'♚' || p1 == L'♔' || p2 == L'♚' || p2 == L'♔');
-}
-
-bool isValidMove(Board board, Turn *game, const Color current, const Move move)
+bool isValidMove(Board board, Turn *game, const Color current, Move *move)
 {
     if(
-        !moveInBounds(move) ||
-        pieceColor(getAt(board, move.src)) != current ||
-        eqPairu(move.src, move.dst)
+        !moveInBounds(*move) ||
+        pieceColor(getAt(board, move->src)) != current ||
+        eqPairu(move->src, move->dst)
     )
         return false;
 
     Moves moves = {0};
-    findValidMoves(board, game, moves, move.src);
-    return getMoveAt(moves, move.dst) != M_INVALID;
+    findValidMoves(board, game, moves, move->src);
+    if(getMoveAt(moves, move->dst) == M_PASSANT)
+        move->type = M_PASSANT;
+    return getMoveAt(moves, move->dst) != M_INVALID;
 }
 
 bool getConfirm(void)
@@ -47,8 +41,13 @@ Move getColorsMove(Board board, Turn *game, const Color current)
 {
     Move move = {.type = M_INVALID};
     do{
+        if(move.type == M_VALID)
+            return move;
+
         clearTerm();
+        // printMove(move);
         printTurnLabel(current);
+
         if(move.type == M_HALF){
             printBoardS(board, move.src);
             printTargetPrompt();
@@ -57,13 +56,19 @@ Move getColorsMove(Board board, Turn *game, const Color current)
             printBoard(board);
             printMovePrompt();
         }
+
         move = tryReadMove(move);
-        if(move.type != M_INVALID && pieceColor(getAt(board, move.src)) != current)
+        if(
+            move.type != M_INVALID &&
+            pieceColor(getAt(board, move.src)) != current
+        )
             move.type = M_INVALID;
+
     }while(
-        !isValidMove(board, game, current, move) ||
+        !isValidMove(board, game, current, &move) ||
         !confirmMove(board, current, move)
     );
+
     return move;
 }
 

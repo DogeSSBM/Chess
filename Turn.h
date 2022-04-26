@@ -91,8 +91,15 @@ Turn* makeTurn(Board board, const Move move)
 Turn* makeMove(Board board, Turn *game, const Move move)
 {
     const wc srcPiece = getAt(board, move.src);
+    const wc dstPiece = getAt(board, move.dst);
     setAt(board, move.dst, srcPiece);
-    setAt(board, move.src, L' ');
+    setAt(board, move.src, pieceColor(srcPiece)==pieceColor(dstPiece)?dstPiece:L' ');
+    const Pairu passant = {.x = move.dst.x, .y = move.src.y};
+    wprintf(L"%ls: (%u, %u)\n", MoveTypeStr[move.type], passant.x, passant.y);
+    if(move.type == M_PASSANT){
+        setAt(board, passant, L' ');
+        wprintf(L"yo\n");
+    }
     return appendTurn(game, makeTurn(board, move));
 }
 

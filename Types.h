@@ -10,9 +10,20 @@ typedef bool Moves[8][8];
 typedef enum{S_NEUTRAL, S_CHECK, S_MATE}GameState;
 typedef enum{C_NONE, C_WHITE, C_BLACK}Color;
 typedef enum{M_INVALID, M_HALF, M_VALID, M_CAPTURE, M_PROMOTE, M_CASTLE, M_PASSANT}MoveType;
-typedef enum{A_ADJ, A_DAG}Algn;
-typedef enum{D_U, D_R, D_D, D_L, D_N}Dir;
+const wc *MoveTypeStr[7] = {L"M_INVALID", L"M_HALF", L"M_VALID", L"M_CAPTURE", L"M_PROMOTE", L"M_CASTLE", L"M_PASSANT"};
+typedef enum{A_INVALID, A_ADJ, A_DAG}Algn;
+typedef enum{D_U, D_R, D_D, D_L, D_N, D_INVALID}Dir;
 typedef enum{P_DEFAULT, P_COLORS, P_MOVES}PrintType;
+
+uint minu(const uint a, const uint b)
+{
+    return a < b ? a : b;
+}
+
+uint maxu(const uint a, const uint b)
+{
+    return a > b ? a : b;
+}
 
 typedef union{
     uint arr[2];
@@ -45,6 +56,14 @@ typedef struct Turn{
 void clearTerm(void)
 {
     wprintf(__extension__(L"\e[1;1H\e[2J"));
+}
+
+Pairu pairuAbsDif(const Pairu p1, const Pairu p2)
+{
+    return (const Pairu){
+        .x = maxu(p1.x, p2.x) - minu(p1.x, p2.x),
+        .y = maxu(p1.y, p2.y) - minu(p1.y, p2.y)
+    };
 }
 
 bool eqPairu(const Pairu p1, const Pairu p2)
