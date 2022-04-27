@@ -10,6 +10,8 @@
 #include <stdio.h>
 
 #include "Types.h"
+#include "Pairu.h"
+#include "Dir.h"
 #include "Board.h"
 #include "MoveCheck.h"
 #include "Print.h"

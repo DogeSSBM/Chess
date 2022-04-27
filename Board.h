@@ -33,14 +33,14 @@ uint coordToUint(const wc c)
 
 void resetBoard(Board board)
 {
-    memcpy(board[0], (wc[8]){L'♜',L'♞',L'♝',L'♛',L'♚',L'♝',L'♞',L'♜'}, sizeof(wc)*8);
-    memcpy(board[1], (wc[8]){L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟'}, sizeof(wc)*8);
+    memcpy(board[0], (wc[8]){L'♖',L'♘',L'♗',L'♕',L'♔',L'♗',L'♘',L'♖'}, sizeof(wc)*8);
+    memcpy(board[1], (wc[8]){L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙'}, sizeof(wc)*8);
     memcpy(board[2], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
     memcpy(board[3], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
-    memcpy(board[4], (wc[8]){L'♟',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
+    memcpy(board[4], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
     memcpy(board[5], (wc[8]){L' ',L' ',L' ',L' ',L' ',L' ',L' ',L' '}, sizeof(wc)*8);
-    memcpy(board[6], (wc[8]){L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙',L'♙'}, sizeof(wc)*8);
-    memcpy(board[7], (wc[8]){L'♖',L'♘',L'♗',L'♕',L'♔',L'♗',L'♘',L'♖'}, sizeof(wc)*8);
+    memcpy(board[6], (wc[8]){L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟',L'♟'}, sizeof(wc)*8);
+    memcpy(board[7], (wc[8]){L'♜',L'♞',L'♝',L'♛',L'♚',L'♝',L'♞',L'♜'}, sizeof(wc)*8);
 }
 
 void cpyBoard(Board dst, Board src)
