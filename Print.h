@@ -3,26 +3,6 @@
 
 Color pieceColor(const wc);
 
-
-
-void bufferBoard(Board board, Buffer buf)
-{
-    wc temp[256];
-    memset(temp, L' ', sizeof(wc)*256);
-    memset(buf, L' ', sizeof(wc)*BUFLEN);
-    wcscat(buf, L"    a   b   c   d   e   f   g   h  \n");
-    wcscat(buf, L"  +---+---+---+---+---+---+---+---+\n");
-    for(int y = 0; y < 8; y++){
-        fwprintf(temp, "%lc |", btowc('8'-y));
-        wcscat(buf, temp);
-        for(int x = 0; x < 8; x++){
-            const Pairu src = {.x = x, .y = y};
-            fwprintf(temp, " %lc |", btowc('8'-y));
-        }
-        fwprintf(temp, "%lc |", btowc('8'-y));
-    }
-}
-
 void printBoardHelper(Board board, const bool colors, const Pairu select, const Pairu target)
 {
     fputws(L"    a   b   c   d   e   f   g   h  \n",stdout);

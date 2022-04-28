@@ -4,8 +4,11 @@
 typedef wchar_t wc;
 typedef unsigned int uint;
 
-#define BUFLEN      2048
-typedef wc Buffer[];
+typedef struct{
+    wc *str;
+    wc *pos;
+    wc *end;
+}Buffer;
 
 typedef wc Board[8][8];
 typedef bool Moves[8][8];
