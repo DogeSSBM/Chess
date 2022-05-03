@@ -1,6 +1,25 @@
 #ifndef MOVECHECK_H
 #define MOVECHECK_H
 
+bool validPos(const Vec2u pos)
+{
+    return pos.x >= 0 && pos.x < 8 && pos.y >= 0 && pos.y < 8;
+}
+
+MoveType getMoveAt(Valid moves, const Vec2u pos)
+{
+    if(!validPos(pos)){
+        fwprintf(stderr, L"Error: %ls out of bounds\n", Vec2Strify(pos));
+        return EXIT_FAILURE;
+    }
+    return moves[y][x];
+}
+
+void setMoveAt(Valid moves, const Vec2u pos, const MoveType type)
+{
+    moves[y][x] = type;
+}
+
 void resetMoves(Valid moves)
 {
     for(uint i = 0; i < 8; i++)
