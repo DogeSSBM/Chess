@@ -30,7 +30,9 @@ typedef enum{
 typedef Piece Board[8][8];
 typedef wc BoardStr[708];
 
-typedef  Valid[8][8];
+typedef enum{M_MOVE, M_CAPTURE, M_PROMOTE, M_CASTLE, M_PASSANT}MoveType;
+
+typedef MoveType Valid[8][8];
 
 const static wc pwc[P_N] = {
     L'♟', L'♜', L'♞', L'♝', L'♛', L'♚',
