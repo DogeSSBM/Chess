@@ -4,29 +4,12 @@ int main(void)
 {
     setlocale(LC_ALL, "en_US.utf8");
 
-    Buffer *buffer = bufBoard(NULL);
-    wprintf(buffer->str);
-    // Color curColor = C_WHITE;
-    // Turn *game = NULL;
-    // do{
-    //     // const Move move = getColorsMove(board, game, curColor);
-    //     Move move = {0};
-    //     while(move->type < M_VALID){
-    //         clearTerm();
-    //         printTurnLabel(curColor);
-    //         if(move.type == M_HALF){
-    //             printBoardS(board, move.src);
-    //             printTargetPrompt();
-    //         }else{
-    //             move.type = M_INVALID;
-    //             printBoard(board);
-    //             printMovePrompt();
-    //         }
-    //     }
-    //     game = makeMove(board, game, move);
-    //     curColor = colorInv(curColor);
-    // }while(lastTurn(game)->state != S_MATE);
-    // printGame(game);
-    // freeGame(game);
+    Vec2 pos = {.x=0, .y=0};
+    for(Dir d = D_U; d < D_N; d++){
+        const Vec2 tmp = shift(pos, d, 1);
+        wprintf(L"shift(%ls, %ls, 1) -> ", Vec2Strify(pos), DirStr[d]);
+        wprintf(L"%ls\n",Vec2Strify(tmp));
+    }
+
     return 0;
 }

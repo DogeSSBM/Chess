@@ -3,95 +3,81 @@
 
 typedef wchar_t wc;
 typedef unsigned int uint;
+typedef unsigned long long ull;
 
-typedef struct{
-    wc *str;
-    wc *pos;
-    wc *end;
-}Buffer;
-
-typedef wc Board[8][8];
-typedef bool Moves[8][8];
+typedef union{
+    int arr[2];
+    struct{
+        int x;
+        int y;
+    };
+    struct{
+        int col;
+        int row;
+    };
+    struct{
+        int file;
+        int rank;
+    };
+}Vec2;
 
 typedef enum{
-    S_NEUTRAL, S_CHECK, S_MATE, S_N
-}GameState;
-const wc *GameStateStr[S_N] = {
-    L"S_NEUTRAL", L"S_CHECK", L"S_MATE"
+    P_PAWN_W, P_ROOK_W, P_KNIGHT_W, P_BISHOP_W, P_QUEEN_W, P_KING_W,
+    P_PAWN_B, P_ROOK_B, P_KNIGHT_B, P_BISHOP_B, P_QUEEN_B, P_KING_B,
+    P_EMPTY, P_N
+}Piece;
+
+typedef Piece Board[8][8];
+typedef wc BoardStr[708];
+
+typedef  Valid[8][8];
+
+const static wc pwc[P_N] = {
+    L'♟', L'♜', L'♞', L'♝', L'♛', L'♚',
+    L'♙', L'♖', L'♘', L'♗', L'♕', L'♔',
+    L' '
+};
+
+const static wc pch[P_N] = {
+    L'P', L'R', L'K', L'B', L'Q', L'K',
+    L'p', L'r', L'k', L'b', L'q', L'k',
+    L' '
 };
 
 typedef enum{
     C_NONE, C_WHITE, C_BLACK, C_N
 }Color;
+
 const wc *ColorStr[C_N] = {
     L"C_NONE", L"C_WHITE", L"C_BLACK"
 };
 
 typedef enum{
-    M_INVALID, M_HALF, M_VALID, M_CAPTURE, M_PROMOTE, M_CASTLE, M_PASSANT, M_N
-}MoveType;
-const wc *MoveTypeStr[M_N] = {
-    L"M_INVALID", L"M_HALF", L"M_VALID", L"M_CAPTURE", L"M_PROMOTE", L"M_CASTLE", L"M_PASSANT"
-};
-
-typedef enum{
-    A_INVALID, A_ADJ, A_DAG, A_N
-}Algn;
-const wc *AlgnStr[A_N] = {
-    L"A_INVALID", L"A_ADJ", L"A_DAG"
-};
-
-typedef enum{
-    D_U, D_R, D_D, D_L, D_N, D_INVALID
+    D_U, D_UR, D_R, D_DR,
+    D_D, D_DL, D_L, D_UL,
+    D_N
 }Dir;
+
 const wc *DirStr[D_N] = {
-    L"D_U", L"D_R", L"D_D", L"D_L"
+    L"D_U", L"D_UR", L"D_R", L"D_DR",
+    L"D_D", L"D_DL", L"D_L", L"D_UL"
 };
-
-typedef enum{P_DEFAULT, P_COLORS, P_MOVES}PrintType;
-
-uint minu(const uint a, const uint b)
-{
-    return a < b ? a : b;
-}
-
-uint maxu(const uint a, const uint b)
-{
-    return a > b ? a : b;
-}
-
-typedef union{
-    uint arr[2];
-    struct{
-        uint x;
-        uint y;
-    };
-    struct{
-        uint col;
-        uint row;
-    };
-    struct{
-        uint w;
-        uint h;
-    };
-}Pairu;
 
 typedef struct{
-    MoveType type;
-    Pairu src;
-    Pairu dst;
+    struct{
+        Piece piece;
+        Vec2 pos;
+    }src;
+    struct{
+        Piece piece;
+        Vec2 pos;
+    }dst;
 }Move;
 
 typedef struct Turn{
-    GameState state;
     Move move;
     struct Turn *next;
 }Turn;
-
-void clearTerm(void)
-{
-    wprintf(__extension__(L"\e[1;1H\e[2J"));
-}
 
 Color colorInv(const Color color)
 {
@@ -101,5 +87,16 @@ Color colorInv(const Color color)
         return C_WHITE;
     return C_NONE;
 }
+
+uint maxu(const uint a, const uint b)
+{
+    return a>b?a:b;
+}
+
+uint minu(const uint a, const uint b)
+{
+    return a<b?a:b;
+}
+
 
 #endif /* end of include guard: TYPES_H */

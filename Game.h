@@ -1,75 +1,110 @@
 #ifndef GAME_H
 #define GAME_H
 
-bool isValidMove(Board board, Turn *game, const Color current, Move *move)
+void resetBoard(Board board)
 {
-    if(
-        !moveInBounds(*move) ||
-        pieceColor(getAt(board, move->src)) != current ||
-        eqPairu(move->src, move->dst)
-    )
-        return false;
-
-    Moves moves = {0};
-    findValidMoves(board, game, moves, move->src);
-    if(getMoveAt(moves, move->dst) == M_PASSANT)
-        move->type = M_PASSANT;
-    return getMoveAt(moves, move->dst) != M_INVALID;
+    const Board initialBoard = {
+        {P_ROOK_B,P_KNIGHT_B,P_BISHOP_B,P_QUEEN_B,P_KING_B,P_BISHOP_B,P_KNIGHT_B,P_ROOK_B},
+        {P_PAWN_B,P_PAWN_B,P_PAWN_B,P_PAWN_B,P_PAWN_B,P_PAWN_B,P_PAWN_B,P_PAWN_B},
+        {P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY},
+        {P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY},
+        {P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY},
+        {P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY,P_EMPTY},
+        {P_PAWN_W,P_PAWN_W,P_PAWN_W,P_PAWN_W,P_PAWN_W,P_PAWN_W,P_PAWN_W,P_PAWN_W},
+        {P_ROOK_W,P_KNIGHT_W,P_BISHOP_W,P_QUEEN_W,P_KING_W,P_BISHOP_W,P_KNIGHT_W,P_ROOK_W}
+    };
+    for(uint i = 0; i < 8; i++)
+        memcpy(board[i], initialBoard[i], sizeof(Piece)*8);
 }
 
-bool getConfirm(void)
+Piece pieceAt(Board board, const Vec2 pos)
 {
-    int ans = fgetc(stdin);
-    if(ans == '\n')
-        return true;
-    while((fgetc(stdin))!='\n')
-            ans = 'n';
-    return ans == 'y' || ans == 'Y';
+    return board[pos.y][pos.x];
 }
 
-bool confirmMove(Board board, const Color current, const Move move)
+Piece pieceSet(Board board, const Vec2 pos, const Piece piece)
 {
-    clearTerm();
-    printTurnLabel(current);
-    printBoardMove(board, move);
-    printConfirmPrompt();
-    return getConfirm();
+    const Piece oldPiece = pieceAt(board, pos);
+    board[pos.y][pos.x] = piece;
+    return oldPiece;
 }
 
-// Turn* lastTurn(Turn *); // i know... this is hax
-Move getColorsMove(Board board, Turn *game, const Color current)
+bool validPiece(const Piece piece)
 {
-    Move move = {.type = M_INVALID};
-    do{
-        if(move.type == M_VALID)
-            return move;
+    return piece >= 0 && piece < P_N;
+}
 
-        clearTerm();
-        // printMove(move);
-        printTurnLabel(current);
+Color pieceColor(const Piece piece)
+{
+    if(!validPiece(piece)){
+        fwprintf(
+            stderr,
+            L"Error: (ull)%ill is not a valid piece\n",
+            (ull)piece
+        );
+        exit(EXIT_FAILURE);
+    }
+    if(piece == P_EMPTY)
+        return C_NONE;
+    return piece > P_KING_W ? C_BLACK : C_WHITE;
+}
 
-        if(move.type == M_HALF){
-            printBoardS(board, move.src);
-            printTargetPrompt();
-        }else{
-            move.type = M_INVALID;
-            printBoard(board);
-            printMovePrompt();
-        }
+Turn *applyTurn(Board board, Turn *turn)
+{
+    if(!turn)
+        return NULL;
+    if(pieceSet(board, turn->move.src.pos, P_EMPTY) != turn->move.src.piece){
+        fwprintf(
+            stderr,
+            L"Error: board piece: '%lc' doesn't match move piece: '%lc' at: %ls\n",
+            pwc[pieceAt(board, turn->move.src.pos)],
+            pwc[turn->move.src.piece],
+            Vec2Strify(turn->move.src.pos)
+        );
+        exit(EXIT_FAILURE);
+    }
+    return turn->next;
+}
 
-        move = tryReadMove(move);
-        if(
-            move.type != M_INVALID &&
-            pieceColor(getAt(board, move.src)) != current
-        )
-            move.type = M_INVALID;
+void consBoardState(Board board, Turn *game)
+{
+    resetBoard(board);
+    while(game)
+        game = applyTurn(board, game);
 
-    }while(
-        !isValidMove(board, game, current, &move) ||
-        !confirmMove(board, current, move)
-    );
+}
 
-    return move;
+Turn* appendTurn(Turn *game, Turn *turn)
+{
+    if(!game)
+        return turn;
+    if(!turn)
+        return game;
+    Turn *cur = game;
+    while(cur->next)
+        cur = cur->next;
+    cur->next = turn;
+    return game;
+}
+
+Turn* lastTurn(Turn *game)
+{
+    if(!game)
+        return NULL;
+    while(game->next)
+        game = game->next;
+    return game;
+}
+
+Turn* nextTurn(Turn *game)
+{
+    Board board;
+    consBoardState(board, game);
+    Turn *turn = calloc(1, sizeof(Turn));
+
+
+     appendTurn(game, turn);
+     return game;
 }
 
 #endif /* end of include guard: GAME_H */

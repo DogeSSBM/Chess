@@ -11,11 +11,7 @@
 #include <wchar.h>
 
 #include "Types.h"
-#include "Buffer.h"
-#include "Pairu.h"
-#include "Dir.h"
-#include "Board.h"
-#include "MoveCheck.h"
-#include "Print.h"
+#include "Vec2.h"
+#include "IO.h"
 #include "Game.h"
-#include "Turn.h"
+#include "MoveCheck.h"

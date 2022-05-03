@@ -1,88 +1,37 @@
 #ifndef MOVECHECK_H
 #define MOVECHECK_H
 
-Pairu shift(const Pairu target, const Dir dir, const int dist)
+void resetMoves(Valid moves)
 {
-    switch(dir){
-        case D_U:
-            return (const Pairu){.x = target.x, .y = target.y - dist};
-            break;
-        case D_R:
-            return (const Pairu){.x = target.x + dist, .y = target.y};
-            break;
-        case D_D:
-            return (const Pairu){.x = target.x, .y = target.y + dist};
-            break;
-        case D_L:
-            return (const Pairu){.x = target.x - dist, .y = target.y};
-            break;
-        default:
-            fwprintf(stderr, L"Error: invalid direction: %i\n", dir);
-            exit(EXIT_FAILURE);
-    }
+    for(uint i = 0; i < 8; i++)
+        memset(moves[i], false, sizeof(bool)*8);
 }
 
-Pairu shift2(const Pairu target, const Dir dir1, const Dir dir2, const int dist)
-{
-    return shift(shift(target, dir1, dist), dir2, dist);
-}
-
-Pairu shiftAlgn(const Pairu target, const Dir dir, const Algn algn, const int dist)
-{
-    if(algn == A_ADJ)
-        return shift(target, dir, dist);
-    return shift2(target, dir, dirRor(dir), dist);
-}
-
-MoveType getMoveAt(Moves moves, const Pairu target)
-{
-    if(!pairuInBounds(target)){
-        fwprintf(
-            stderr, L"Error: move target (%u, %u) out of bounds\n",
-            target.x, target.y
-        );
-        exit(EXIT_FAILURE);
-    }
-    return moves[target.y][target.x];
-}
-
-void setMoveAt(Moves moves, const Pairu target, const MoveType mt)
-{
-    if(!pairuInBounds(target)){
-        fwprintf(
-            stderr, L"Error: move target (%u, %u) out of bounds\n",
-            target.x, target.y
-        );
-        exit(EXIT_FAILURE);
-    }
-    moves[target.y][target.x] = mt;
-}
-
-uint validMoveCount(Moves moves)
+uint validMoveCount(Valid moves)
 {
     uint total = 0;
     for(uint y = 0; y < 8; y++){
         for(uint x = 0; x < 8; x++){
-            const Pairu cur = {.x = x, .y = y};
+            const Vec2 cur = {.x = x, .y = y};
             total += getMoveAt(moves, cur) != M_INVALID;
         }
     }
     return total;
 }
 
-void resetMoves(Moves moves)
+void resetMoves(Valid moves)
 {
     for(uint y = 0; y < 8; y++){
         for(uint x = 0; x < 8; x++){
-            const Pairu cur = {.x = x, .y = y};
+            const Vec2 cur = {.x = x, .y = y};
             setMoveAt(moves, cur, M_INVALID);
         }
     }
 }
 
-bool movable(Moves moves, const Pairu dst, const Color dstColor, const Color srcColor)
+bool movable(Valid moves, const Vec2 dst, const Color dstColor, const Color srcColor)
 {
-    if(!pairuInBounds(dst))
+    if(!Vec2uInBounds(dst))
         return false;
     if(dstColor == C_NONE){
         setMoveAt(moves, dst, M_VALID);
@@ -95,11 +44,11 @@ bool movable(Moves moves, const Pairu dst, const Color dstColor, const Color src
     return false;
 }
 
-uint cast(Board board, Moves moves, const Pairu src, const Algn algn, const Dir dir, const uint dist)
+uint cast(Board board, Valid moves, const Vec2 src, const Algn algn, const Dir dir, const uint dist)
 {
-    if(!pairuInBounds(src))
+    if(!Vec2uInBounds(src))
         return 0;
-    const Color srcColor = pieceColor(getAt(board, src));
+    const Color srcColor = pieceColor(pieceAt(board, src));
     if(srcColor == C_NONE)
         return 0;
 
@@ -107,10 +56,10 @@ uint cast(Board board, Moves moves, const Pairu src, const Algn algn, const Dir 
     uint dirDist = dist ? dist : 8;
 
     for(uint i = 1; i < dirDist; i++){
-        const Pairu dst = shiftAlgn(src, dir, algn, i);
+        const Vec2 dst = shiftAlgn(src, dir, algn, i);
         if(
-            !pairuInBounds(dst) ||
-            !movable(moves, dst, pieceColor(getAt(board, dst)), srcColor)
+            !Vec2uInBounds(dst) ||
+            !movable(moves, dst, pieceColor(pieceAt(board, dst)), srcColor)
         )
             return total;
         total++;
@@ -118,7 +67,7 @@ uint cast(Board board, Moves moves, const Pairu src, const Algn algn, const Dir 
     return total;
 }
 
-uint prop(Board board, Moves moves, const Pairu src, const Algn algn, const uint dist)
+uint prop(Board board, Valid moves, const Vec2 src, const Algn algn, const uint dist)
 {
     uint total = 0;
     for(Dir i = D_U; i < D_N; i++)
@@ -128,15 +77,15 @@ uint prop(Board board, Moves moves, const Pairu src, const Algn algn, const uint
 }
 
 Turn* applyTurn(Board, Turn *); // i know... this is hax
-bool hasMoved(const Pairu src, Turn *game)
+bool hasMoved(const Vec2 src, Turn *game)
 {
     if(!game)
         return false;
     Board board;
     resetBoard(board);
-    const wc piece = getAt(board, src);
+    const wc piece = pieceAt(board, src);
     do{
-        if(getAt(board, src) != piece)
+        if(pieceAt(board, src) != piece)
             return true;
     }while((game = applyTurn(board, game)));
     return false;
@@ -155,45 +104,45 @@ bool hasCastled(Turn *game, const Color color)
     return false;
 }
 
-uint knightMoves(Board board, Moves moves, const Pairu src)
+uint knightMoves(Board board, Valid moves, const Vec2 src)
 {
-    if(!pairuInBounds(src))
+    if(!Vec2uInBounds(src))
         return 0;
 
     fwprintf(
         stdout, L"src: (%u, %u)\n",
         src.x, src.y
     );
-    const wc srcPiece = getAt(board, src);
+    const Piece srcPiece = pieceAt(board, src);
     fwprintf(stdout, L"\nsrcPiece: %lc\n", srcPiece);
     const Color srcColor = pieceColor(srcPiece);
 
     uint total = 0;
     for(Dir i = 0; i < 4; i++){
-        Pairu dst;
-        Pairu fork = shift(src, i, 1);
+        Vec2 dst;
+        Vec2 fork = shift(src, i, 1);
 
-        if(pairuInBounds(dst = shift(fork,dirRor(i),2)))
-            total += movable(moves, dst, pieceColor(getAt(board,dst)), srcColor);
-        if(pairuInBounds(dst = shift(fork,dirRol(i),2)))
-            total += movable(moves, dst, pieceColor(getAt(board,dst)), srcColor);
+        if(Vec2uInBounds(dst = shift(fork,dirRor(i),2)))
+            total += movable(moves, dst, pieceColor(pieceAt(board,dst)), srcColor);
+        if(Vec2uInBounds(dst = shift(fork,dirRol(i),2)))
+            total += movable(moves, dst, pieceColor(pieceAt(board,dst)), srcColor);
 
         fork = shift(fork, i, 1);
 
-        if(pairuInBounds(dst = shift(fork,dirRor(i),1)))
-            total += movable(moves, dst, pieceColor(getAt(board,dst)), srcColor);
-        if(pairuInBounds(dst = shift(fork,dirRol(i),1)))
-            total += movable(moves, dst, pieceColor(getAt(board,dst)), srcColor);
+        if(Vec2uInBounds(dst = shift(fork,dirRor(i),1)))
+            total += movable(moves, dst, pieceColor(pieceAt(board,dst)), srcColor);
+        if(Vec2uInBounds(dst = shift(fork,dirRol(i),1)))
+            total += movable(moves, dst, pieceColor(pieceAt(board,dst)), srcColor);
     }
     return total;
 }
 
-Algn posAlgn(const Pairu src, const Pairu dst)
+Algn posAlgn(const Vec2 src, const Vec2 dst)
 {
-    if(eqPairu(src, dst))
+    if(eqVec2u(src, dst))
         return A_INVALID;
 
-    const Pairu dif = pairuAbsDif(src, dst);
+    const Vec2 dif = Vec2uAbsDif(src, dst);
     if(dif.x == dif.y)
         return A_DAG;
 
@@ -203,20 +152,20 @@ Algn posAlgn(const Pairu src, const Pairu dst)
     return A_INVALID;
 }
 
-uint findValidMoves(Board, Turn *, Moves, const Pairu); // moar hax
+uint findValidMoves(Board, Turn *, Moves, const Vec2u); // moar hax
 bool inCheck(Board board, const Color color)
 {
     if(color == C_NONE)
         return false;
-    const Pairu kingPos = getKing(board, color);
+    const Vec2 kingPos = getKing(board, color);
     const wc kingPiece = color == C_WHITE ? L'♚' : L'♔';
     for(uint y = 0; y < 8; y++){
         for(uint x = 0; x < 8; x++){
-            const Pairu pos = {.x=x, .y=y};
-            const wc piece = getAt(board, pos);
+            const Vec2 pos = {.x=x, .y=y};
+            const wc piece = pieceAt(board, pos);
             if(piece == L' ' || color == pieceColor(piece)|| piece == kingPiece)
                 continue;
-            Moves moves = {0};
+            Valid moves = {0};
             findValidMoves(board, NULL, moves, pos);
             if(getMoveAt(moves, kingPos) == M_CAPTURE)
                 return true;
@@ -235,12 +184,12 @@ bool areCastilable(const wc p1, const wc p2)
 
 // src < dst < src
 //  ♖ L  ♔  R  ♖
-void castlingMove(Board board, Turn *game, Moves moves, const Pairu src)
+void castlingMove(Board board, Turn *game, Valid moves, const Vec2 src)
 {
-    const wc srcPiece = getAt(board, src);
+    const Piece srcPiece = pieceAt(board, src);
     const Color srcColor = pieceColor(srcPiece);
-    const Pairu dst = getKing(board, srcColor);
-    const wc dstPiece = srcColor == C_WHITE ? L'♚' : L'♔';
+    const Vec2 dst = getKing(board, srcColor);
+    const Piece dstPiece = srcColor == C_WHITE ? L'♚' : L'♔';
     if(
         areCastilable(srcPiece, dstPiece) &&
         !hasCastled(game, srcColor) &&
@@ -250,8 +199,8 @@ void castlingMove(Board board, Turn *game, Moves moves, const Pairu src)
         const Dir dir = dst.x < src.x ? D_R : D_L;
 
         bool clear = true;
-        for(Pairu step = shift(src, dir, 1); !eqPairu(dst, step); step = shift(step, dir, 1)){
-            if(getAt(board, step) != L' '){
+        for(Vec2 step = shift(src, dir, 1); !eqVec2u(dst, step); step = shift(step, dir, 1)){
+            if(pieceAt(board, step) != L' '){
                 clear = false;
                 break;
             }
@@ -265,9 +214,9 @@ void castlingMove(Board board, Turn *game, Moves moves, const Pairu src)
     }
 }
 
-uint pawnMoves(Board board, Moves moves, const Pairu src)
+uint pawnMoves(Board board, Valid moves, const Vec2 src)
 {
-    const wc srcPiece = getAt(board, src);
+    const Piece srcPiece = pieceAt(board, src);
     const Color srcColor = pieceColor(srcPiece);
     bool first;
     Dir fDir;
@@ -282,29 +231,29 @@ uint pawnMoves(Board board, Moves moves, const Pairu src)
     }
 
     uint total = 0;
-    const Pairu dst = shift(src, fDir, 1);
-    if(!pairuInBounds(dst))
+    const Vec2 dst = shift(src, fDir, 1);
+    if(!Vec2uInBounds(dst))
         return total;
-    if(getAt(board, dst) == L' '){
+    if(pieceAt(board, dst) == L' '){
         setMoveAt(moves, dst, M_VALID);
         total++;
         if(first){
-            const Pairu fDst = shift(src, fDir, 2);
-            if(pairuInBounds(fDst) && getAt(board, fDst) == L' '){
+            const Vec2 fDst = shift(src, fDir, 2);
+            if(Vec2uInBounds(fDst) && pieceAt(board, fDst) == L' '){
                 setMoveAt(moves, fDst, M_VALID);
                 total++;
             }
         }
     }
 
-    Pairu cap = shift(dst, dirRol(fDir), 1);
-    if(pairuInBounds(cap) && pieceColor(getAt(board, cap)) == colorInv(srcColor)){
+    Vec2 cap = shift(dst, dirRol(fDir), 1);
+    if(Vec2uInBounds(cap) && pieceColor(pieceAt(board, cap)) == colorInv(srcColor)){
         setMoveAt(moves, cap, M_CAPTURE);
         total++;
     }
 
     cap = shift(dst, dirRor(fDir), 1);
-    if(pairuInBounds(cap) && pieceColor(getAt(board, cap)) == colorInv(srcColor)){
+    if(Vec2uInBounds(cap) && pieceColor(pieceAt(board, cap)) == colorInv(srcColor)){
         setMoveAt(moves, cap, M_CAPTURE);
         total++;
     }
@@ -312,83 +261,69 @@ uint pawnMoves(Board board, Moves moves, const Pairu src)
     return total;
 }
 
-Turn* lastTurn(Turn *); // yeah yeah, moar hax
-void enPassant(Board board, Turn *game, Moves moves, const Pairu src)
+bool canPassant(Turn *game)
 {
     if(!game)
-        return;
-
-    const wc srcPiece = getAt(board, src);
-    Turn *prvTurn = lastTurn(game);
-    const Pairu prvDst = prvTurn->move.dst;
-    const Pairu prvSrc = prvTurn->move.src;
-    const wc prvPiece = getAt(board, prvDst);
-    if(prvDst.x != prvSrc.x)
-        return;
-    Dir fDir = D_INVALID;
-    if(
-        srcPiece == L'♟' && src.y == 4 &&
-        prvPiece == L'♙' && prvSrc.y == 6 &&
-        prvDst.y == 4
-    )
-        fDir = D_D;
-    else if(
-        srcPiece == L'♙' && src.y == 3 &&
-        prvPiece == L'♟' && prvSrc.y == 1 &&
-        prvDst.y == 3
-    )
-        fDir = D_U;
-    else
-        return;
-
-    Pairu target;
-    if(src.x < 7 && eqPairu((target = shift2(src, fDir, D_R, 1)), prvDst))
-        setMoveAt(moves, target, M_PASSANT);
-    else if(src.x > 0 && eqPairu((target = shift2(src, fDir, D_L, 1)), prvDst))
-        setMoveAt(moves, target, M_PASSANT);
+        return false;
+    game = lastTurn(game);
+    const Piece srcPiece = game->move.src.piece;
+    if(srcPiece != P_PAWN_B || srcPiece != P_PAWN_W)
+        return false;
+    const Color srcColor = pieceColor(srcPiece);
+    if(srcColor == C_WHITE && game->move.src.pos.y == 1 && game->move.dst.pos.y == 3)
+        return true;
+    if(srcColor == C_BLACK && game->move.src.pos.y == 6 && game->move.dst.pos.y == 4)
+        return true;
+    return false;
 }
 
-uint findValidMoves(Board board, Turn *game, Moves moves, const Pairu src)
+uint pawnMoves(Board board, Valid moves, const Vec2 pos)
+{
+    return 0;
+}
+
+uint validMoves(Board board, Valid moves, Turn *game, const Vec2 pos)
 {
     resetMoves(moves);
-    const wc srcPiece = getAt(board, src);
+    const Piece srcPiece = pieceAt(board, pos);
+    const Color srcColor = pieceColor(srcPiece);
+    if(srcColor == C_NONE)
+        return 0;
     switch(srcPiece){
-        case L'♜':
-        case L'♖':
-            if(game)
-                castlingMove(board, game, moves, src);
-            prop(board, moves, src, A_ADJ, 0);
-            break;
-        case L'♞':
-        case L'♘':
-            knightMoves(board, moves, src);
-            break;
-        case L'♝':
-        case L'♗':
-            prop(board, moves, src, A_DAG, 0);
-            break;
-        case L'♛':
-        case L'♕':
-            prop(board, moves, src, A_DAG, 0);
-            prop(board, moves, src, A_ADJ, 0);
-            break;
-        case L'♚':
-        case L'♔':
-            prop(board, moves, src, A_DAG, 1);
-            prop(board, moves, src, A_ADJ, 1);
-            break;
-        case L'♟':
-        case L'♙':
-            if(game)
-                enPassant(board, game, moves, src);
-            pawnMoves(board, moves, src);
-            break;
-        case L' ':
-        default:
-            break;
-    }
+        case P_PAWN_B:
+        case P_PAWN_W:
 
-    return validMoveCount(moves);
+            break;
+        case P_ROOK_B:
+        case P_ROOK_W:
+
+            break;
+        case P_KNIGHT_B:
+        case P_KNIGHT_W:
+
+            break;
+        case P_BISHOP_B:
+        case P_BISHOP_W:
+
+            break;
+        case P_QUEEN_B:
+        case P_QUEEN_W:
+
+            break;
+        case P_KING_B:
+        case P_KING_W:
+
+            break;
+        case P_EMPTY:
+        default:
+            return 0;
+    }
+    return 0;
+}
+
+bool inCheck(Board board, const Color color)
+{
+    return false;
 }
 
 #endif /* end of include guard: MOVECHECK_H */
