@@ -71,7 +71,7 @@ Vec2 off(const Vec2 pos, const Vec2 off)
 Vec2 shift(const Vec2 pos, const Dir dir, const uint dist)
 {
     wprintf(L"%ls: (%i, %i)\n", DirStr[dir], dirX(dir), dirY(dir));
-    return off(pos, (const Vec2){.x = dirX(dir), .y = dirY(dir)});
+    return off(pos, (const Vec2){.x = pos.x + dirX(dir)*dist, .y = pos.y + dirY(dir)*dist});
 }
 
 #endif /* end of include guard: Vec2_H */

@@ -17,6 +17,12 @@ void resetBoard(Board board)
         memcpy(board[i], initialBoard[i], sizeof(Piece)*8);
 }
 
+void boardCpy(Board dst, board src)
+{
+    for(uint i = 0; i < 8; i++)
+        memcpy(dst[i], src[i], sizeof(Piece)*8);
+}
+
 Piece pieceAt(Board board, const Vec2 pos)
 {
     return board[pos.y][pos.x];
@@ -53,13 +59,13 @@ Turn *applyTurn(Board board, Turn *turn)
 {
     if(!turn)
         return NULL;
-    if(pieceSet(board, turn->move.src.pos, P_EMPTY) != turn->move.src.piece){
+    if(pieceSet(board, turn->src.pos, P_EMPTY) != turn->src.piece){
         fwprintf(
             stderr,
             L"Error: board piece: '%lc' doesn't match move piece: '%lc' at: %ls\n",
-            pwc[pieceAt(board, turn->move.src.pos)],
-            pwc[turn->move.src.piece],
-            Vec2Strify(turn->move.src.pos)
+            pwc[pieceAt(board, turn->src.pos)],
+            pwc[turn->src.piece],
+            vec2Strify(turn->src.pos)
         );
         exit(EXIT_FAILURE);
     }
@@ -96,7 +102,119 @@ Turn* lastTurn(Turn *game)
     return game;
 }
 
+Vec2 getKing(Board board, const Color srcColor)
+{
+    if(srcColor == C_NONE){
+        fwprintf(stderr, L"Error: cannot get C_BLACK king\n");
+        exit(EXIT_FAILURE);
+    }
+    const Piece srcPiece = srcColor == C_WHITE ? P_KING_W : P_KING_B;
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec2 pos = {.x = x, .y = y};
+            if(srcPiece == pieceAt(board, pos))
+                return pos;
+        }
+    }
+    fwprintf(stderr, L"Error: could not find player %ls's king\n", ColorStr[srcColor]);
+    exit(EXIT_FAILURE);
+    return {0};
+}
 
+bool inCheck(Board board, const Color srcColor)
+{
+    if(srcColor == C_NONE){
+        fwprintf(stderr, L"Error: player %ls cannot be in check\n", ColorStr[srcColor]);
+        exit(EXIT_FAILURE);
+    }
+    const Vec2 king = getKing(board, srcColor);
+
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec2 src = {.x = x, .y = y};
+            const Piece srcPiece = pieceAt(board, src);
+            const Color srcColor = pieceColor(srcPiece);
+            if(srcColor == C_NONE)
+                continue;
+
+            Moves moves;
+            resetMoves(moves);
+            validMovesStateless(board, moves, src);
+            if(getValidAt(moves, king, true))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool movesCanEscapeCheck(Board board, Valid moves, const Vec2 src, const Color srcColor)
+{
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec2 dst = {.x = x, .y = y};
+            if(!getValidAt(moves, dst, true))
+                continue;
+            const Turn turn = {.src = src, .dst = dst};
+            Board applied;
+            boardCpy(applied, board);
+            applyTurn(applied, turn);
+            if(!inCheck(applied, srcColor))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool inCheckMate(Turn *game, const Color srcColor)
+{
+    Board board;
+    resetBoard(board);
+    consBoardState(game, board);
+    if(!inCheck(board, srcColor))
+        return false;
+
+    const Vec2 king;
+    const Vec2 rooks[2];
+    if(srcColor == C_BLACK){
+        king.x=4;
+        king.y=0;
+        rooks[0].x=0;
+        rooks[0].y=0;
+        rooks[1].x=7;
+        rooks[1].y=0;
+    }else if(C_WHITE){
+        king.x=4;
+        king.y=7;
+        rooks[0].x=0;
+        rooks[0].y=7;
+        rooks[1].x=7;
+        rooks[1].y=7;
+    }else{
+        fwprintf(stderr, L"Error: player %ls cannot be in mate\n", ColorStr[srcColor]);
+        exit(EXIT_FAILURE);
+    }
+
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec2 src = {.x = x, .y = y};
+            const Piece srcPiece = pieceAt(board, src);
+            const Color srcColor = pieceColor(srcPiece);
+            if(srcColor == C_NONE)
+                continue;
+
+            Moves moves;
+            resetMoves(moves);
+            validMovesStateless(board, moves, src);
+            if(movesCanEscapeCheck(board, moves, src, srcColor));
+                return false;
+        }
+    }
+
+
+    if(!turnPosChanged(game, rooks[0])){
+
+    }
+}
 
 Turn* nextTurn(Turn *game, GameState state)
 {
@@ -109,10 +227,26 @@ Turn* nextTurn(Turn *game, GameState state)
         exit(EXIT_FAILURE);
     }
 
+    Board board;
+    consBoardState(board, game);
+    BoardStr str;
+    boardStrify(board, str);
+
     Turn *turn = calloc(1, sizeof(Turn));
-    turn->move = getPlayerMove(game, state);
+    // turn->move = getPlayerMove(game, state);
 
      return game = appendTurn(game, turn);
+}
+
+GameState evalState(Turn *game)
+{
+    if(!game){
+        fwprintf(stderr, L"Error: game should contain at least one turn\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Turn *last = lastTurn(game);
+
 }
 
 #endif /* end of include guard: GAME_H */

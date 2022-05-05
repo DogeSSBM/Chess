@@ -1,6 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#define BOARDSTRLEN 708
+
 typedef wchar_t wc;
 typedef unsigned int uint;
 typedef unsigned long long ull;
@@ -28,22 +30,22 @@ typedef enum{
 }Piece;
 
 typedef Piece Board[8][8];
-typedef wc BoardStr[708];
+typedef wc BoardStr[BOARDSTRLEN];
 
-typedef Valid bool[8][8];
+typedef bool Valid[8][8];
 
-typedef enum{G_NEUTRAL, G_CHECK_B, G_CHECK_W, G_DRAW, G_MATE_B, G_CHECK_W, G_N}GameState;
+typedef enum{G_NEUTRAL_W, G_NEUTRAL_B, G_CHECK_W, G_CHECK_B, G_DRAW, G_MATE_W, G_MATE_B, G_N}GameState;
 const wc *GameStateStr[G_N] = {
-    L"G_NEUTRAL", L"G_CHECK_B", L"G_CHECK_W", L"G_DRAW", L"G_MATE_B", L"G_CHECK_W", L"G_N"
+    L"G_NEUTRAL_W", L"G_NEUTRAL_B", L"G_CHECK_W", L"G_CHECK_B", L"G_DRAW", L"G_MATE_W", L"G_MATE_B"
 };
 
-const static wc pwc[P_N] = {
+const wc pwc[P_N] = {
     L'♟', L'♜', L'♞', L'♝', L'♛', L'♚',
     L'♙', L'♖', L'♘', L'♗', L'♕', L'♔',
     L' '
 };
 
-const static wc pch[P_N] = {
+const wc pch[P_N] = {
     L'P', L'R', L'K', L'B', L'Q', L'K',
     L'p', L'r', L'k', L'b', L'q', L'k',
     L' '

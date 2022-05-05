@@ -9,6 +9,7 @@ void clearTerm(void)
 
 void boardStrify(Board board, BoardStr str)
 {
+    memset(str, 0, BOARDSTRLEN);
     wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
     wcscat(str, L"  +---+---+---+---+---+---+---+---+\n");
     for(int y = 0; y < 8; y++){
@@ -22,10 +23,17 @@ void boardStrify(Board board, BoardStr str)
     wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
 }
 
-wc* Vec2Strify(const Vec2 pos)
+wc* vec2Strify(const Vec2 pos)
 {
     swprintf(buf, 64, L"(Vec2){%i, %i}", pos.x, pos.y);
     return buf;
+}
+
+void boardStrSelect(BoardStr str, const Vec2 pos, wc braces[2])
+{
+    const uint index = 37 + pos.y * 36 + (pos.y + 1) * 39 + 4 * pos.x;
+    str[index-1] = braces[0];
+    str[index+1] = braces[1];
 }
 
 #endif /* end of include guard: IO_H */

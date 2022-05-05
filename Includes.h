@@ -11,6 +11,8 @@
 #include <wchar.h>
 
 #include "Types.h"
+#include "Decls.h"
+
 #include "Vec2.h"
 #include "IO.h"
 #include "Game.h"
