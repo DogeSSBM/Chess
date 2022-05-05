@@ -17,7 +17,7 @@ void resetBoard(Board board)
         memcpy(board[i], initialBoard[i], sizeof(Piece)*8);
 }
 
-void boardCpy(Board dst, board src)
+void boardCpy(Board dst, Board src)
 {
     for(uint i = 0; i < 8; i++)
         memcpy(dst[i], src[i], sizeof(Piece)*8);
@@ -118,7 +118,7 @@ Vec2 getKing(Board board, const Color srcColor)
     }
     fwprintf(stderr, L"Error: could not find player %ls's king\n", ColorStr[srcColor]);
     exit(EXIT_FAILURE);
-    return {0};
+    return (const Vec2){.x=-1, .y=-1};
 }
 
 bool inCheck(Board board, const Color srcColor)
@@ -137,8 +137,8 @@ bool inCheck(Board board, const Color srcColor)
             if(srcColor == C_NONE)
                 continue;
 
-            Moves moves;
-            resetMoves(moves);
+            Valid moves;
+            resetValid(moves);
             validMovesStateless(board, moves, src);
             if(getValidAt(moves, king, true))
                 return true;
@@ -154,10 +154,10 @@ bool movesCanEscapeCheck(Board board, Valid moves, const Vec2 src, const Color s
             const Vec2 dst = {.x = x, .y = y};
             if(!getValidAt(moves, dst, true))
                 continue;
-            const Turn turn = {.src = src, .dst = dst};
+            Turn turn = {.src.pos = src, .dst.pos = dst};
             Board applied;
             boardCpy(applied, board);
-            applyTurn(applied, turn);
+            applyTurn(applied, &turn);
             if(!inCheck(applied, srcColor))
                 return true;
         }
@@ -169,12 +169,12 @@ bool inCheckMate(Turn *game, const Color srcColor)
 {
     Board board;
     resetBoard(board);
-    consBoardState(game, board);
+    consBoardState(board, game);
     if(!inCheck(board, srcColor))
         return false;
 
-    const Vec2 king;
-    const Vec2 rooks[2];
+    Vec2 king;
+    Vec2 rooks[2];
     if(srcColor == C_BLACK){
         king.x=4;
         king.y=0;
@@ -202,18 +202,21 @@ bool inCheckMate(Turn *game, const Color srcColor)
             if(srcColor == C_NONE)
                 continue;
 
-            Moves moves;
-            resetMoves(moves);
+            Valid moves;
+            resetValid(moves);
             validMovesStateless(board, moves, src);
-            if(movesCanEscapeCheck(board, moves, src, srcColor));
+            if(movesCanEscapeCheck(board, moves, src, srcColor))
                 return false;
         }
     }
 
-
-    if(!turnPosChanged(game, rooks[0])){
-
+    if(!turnPosChanged(game, king) && !turnPosChanged(game, rooks[0])){
+        return true;
     }
+    if(!turnPosChanged(game, king) && !turnPosChanged(game, rooks[1])){
+        return true;
+    }
+    return true;
 }
 
 Turn* nextTurn(Turn *game, GameState state)
@@ -233,7 +236,13 @@ Turn* nextTurn(Turn *game, GameState state)
     boardStrify(board, str);
 
     Turn *turn = calloc(1, sizeof(Turn));
-    // turn->move = getPlayerMove(game, state);
+    bool valid;
+    do{
+        clearTerm();
+        gameStatePrintPrompt(state);
+        wprintf(str);
+        valid = getTurnInput(turn);
+    }while(!valid || !getConfirm());
 
      return game = appendTurn(game, turn);
 }

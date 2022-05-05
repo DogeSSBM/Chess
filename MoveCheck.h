@@ -221,22 +221,6 @@ uint pawnMoves(Board board, Valid moves, const Vec2 src)
     return total;
 }
 
-bool canPassant(Turn *game)
-{
-    if(!game)
-        return false;
-    game = lastTurn(game);
-    const Piece srcPiece = game->move.src.piece;
-    if(srcPiece != P_PAWN_B || srcPiece != P_PAWN_W)
-        return false;
-    const Color srcColor = pieceColor(srcPiece);
-    if(srcColor == C_WHITE && game->move.src.pos.y == 1 && game->move.dst.pos.y == 3)
-        return true;
-    if(srcColor == C_BLACK && game->move.src.pos.y == 6 && game->move.dst.pos.y == 4)
-        return true;
-    return false;
-}
-
 uint validMovesStateless(Board board, Moves moves, const Vec2 pos)
 {
     resetMoves(moves);
