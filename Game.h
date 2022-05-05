@@ -96,15 +96,23 @@ Turn* lastTurn(Turn *game)
     return game;
 }
 
-Turn* nextTurn(Turn *game)
+
+
+Turn* nextTurn(Turn *game, GameState state)
 {
-    Board board;
-    consBoardState(board, game);
+    if(state >= G_DRAW){
+        fwprintf(
+            stderr,
+            L"Error: can't nextTurn() when GameState == %ls\n",
+            GameStateStr[state]
+        );
+        exit(EXIT_FAILURE);
+    }
+
     Turn *turn = calloc(1, sizeof(Turn));
+    turn->move = getPlayerMove(game, state);
 
-
-     appendTurn(game, turn);
-     return game;
+     return game = appendTurn(game, turn);
 }
 
 #endif /* end of include guard: GAME_H */

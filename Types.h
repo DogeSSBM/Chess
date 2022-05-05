@@ -30,9 +30,12 @@ typedef enum{
 typedef Piece Board[8][8];
 typedef wc BoardStr[708];
 
-typedef enum{M_INVALID, M_MOVE, M_CAPTURE, M_PROMOTE, M_CASTLE, M_PASSANT}MoveType;
+typedef Valid bool[8][8];
 
-typedef MoveType Valid[8][8];
+typedef enum{G_NEUTRAL, G_CHECK_B, G_CHECK_W, G_DRAW, G_MATE_B, G_CHECK_W, G_N}GameState;
+const wc *GameStateStr[G_N] = {
+    L"G_NEUTRAL", L"G_CHECK_B", L"G_CHECK_W", L"G_DRAW", L"G_MATE_B", L"G_CHECK_W", L"G_N"
+};
 
 const static wc pwc[P_N] = {
     L'♟', L'♜', L'♞', L'♝', L'♛', L'♚',
@@ -65,7 +68,7 @@ const wc *DirStr[D_N] = {
     L"D_D", L"D_DL", L"D_L", L"D_UL"
 };
 
-typedef struct{
+typedef struct Turn{
     struct{
         Piece piece;
         Vec2 pos;
@@ -74,10 +77,6 @@ typedef struct{
         Piece piece;
         Vec2 pos;
     }dst;
-}Move;
-
-typedef struct Turn{
-    Move move;
     struct Turn *next;
 }Turn;
 
