@@ -2,7 +2,7 @@
 #define DECLS_H
 
 wc* vec2Strify(const Vec2);
-bool validPos(const Vec2);
+bool validPos(const Vec2, const bool);
 void resetValid(Valid);
 uint validMovesStateless(Board, Valid, const Vec2);
 bool getValidAt(Valid, const Vec2, const bool);

@@ -69,6 +69,7 @@ Turn *applyTurn(Board board, Turn *turn)
         );
         exit(EXIT_FAILURE);
     }
+    pieceSet(board, turn->dst.pos, turn->dst.piece);
     return turn->next;
 }
 
@@ -242,9 +243,14 @@ Turn* nextTurn(Turn *game, GameState state)
         gameStatePrintPrompt(state);
         wprintf(str);
         valid = getTurnInput(turn);
-    }while(!valid || !getConfirm());
-
-     return game = appendTurn(game, turn);
+        Valid moves;
+        validMovesStateless(board, moves, turn->src.pos);
+        selectValid(str, turn->src.pos, moves, L"++", L"--");
+        valid = getValidAt(moves, turn->dst.pos, false);
+    }while(!valid || !getConfirm(str, turn));
+    turn->src.piece = pieceAt(board, turn->src.pos);
+    turn->dst.piece = turn->src.piece;
+    return game = appendTurn(game, turn);
 }
 
 GameState evalState(Turn *game)
@@ -255,7 +261,9 @@ GameState evalState(Turn *game)
     }
 
     Turn *last = lastTurn(game);
-
+    if(pieceColor(last->src.piece) == C_WHITE)
+        return G_NEUTRAL_B;
+    return G_NEUTRAL_W;
 }
 
 #endif /* end of include guard: GAME_H */

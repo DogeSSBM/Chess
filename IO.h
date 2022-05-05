@@ -42,6 +42,19 @@ void boardStrSelect(BoardStr str, const Vec2 pos, wc braces[2])
     str[index+1] = braces[1];
 }
 
+void selectValid(BoardStr str, const Vec2 src, Valid moves, wc srcBraces[2], wc validBraces[2])
+{
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec2 pos = {.x = x, .y = y};
+            if(eqVec2(pos, src))
+                boardStrSelect(str, pos, srcBraces);
+            else if(getValidAt(moves, pos, true))
+                boardStrSelect(str, pos, validBraces);
+        }
+    }
+}
+
 bool isValidAlpha(const wc c)
 {
     return c >= L'a' && c <= L'h';
@@ -66,9 +79,17 @@ void printMovePrompt(void)
     wprintf(L"Enter turn...\n");
 }
 
-void printConfirmPrompt(void)
+void printConfirmPrompt(Turn *turn)
 {
-    wprintf(L"Confirm move (Y/n)...\n");
+    wprintf(
+        L"Confirm move %wc (%u,%u) to %wc (%u,%u)? (Y/n)...\n",
+        turn->src.piece,
+        turn->src.pos.x,
+        turn->src.pos.y,
+        turn->dst.piece,
+        turn->dst.pos.x,
+        turn->dst.pos.y
+    );
 }
 
 Color gameStateColor(const GameState state)
@@ -93,12 +114,14 @@ void gameStatePrintPrompt(const GameState state)
     }
 }
 
-bool getConfirm(void)
+bool getConfirm(BoardStr str, Turn *turn)
 {
-    printConfirmPrompt();
+    clearTerm();
+    wprintf(L"Are you sure -\n%ls\n", str);
+    printConfirmPrompt(turn);
 
     int ans = fgetc(stdin);
-    int nxt;
+    int nxt = ' ';
     if(ans == '\n')
         return true;
     if((ans == 'y' || ans == 'Y') && (nxt = fgetc(stdin)) == '\n')
@@ -132,7 +155,7 @@ bool getTurnInput(Turn *turn)
         turn->src.pos.y = coordToUint(buf[1]);
         turn->dst.pos.x = coordToUint(buf[2]);
         turn->dst.pos.y = coordToUint(buf[3]);
-        return validPos(turn->src.pos) && validPos(turn->dst.pos);
+        return validPos(turn->src.pos, false) && validPos(turn->dst.pos, false);
     }
     return false;
 }
