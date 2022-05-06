@@ -65,6 +65,11 @@ bool isValidNum(const wc c)
     return c >= L'0' && c <= L'8';
 }
 
+bool isValidUint(const uint n)
+{
+    return n >= 1 && n <= 8;
+}
+
 uint coordToUint(const wc c)
 {
     if(isValidNum(c))
@@ -74,22 +79,60 @@ uint coordToUint(const wc c)
     return 9;
 }
 
-void printMovePrompt(void)
+wc uintTox(const uint n)
 {
-    wprintf(L"Enter turn...\n");
+    if(isValidUint(n))
+        return L'a'+n;
+    return L' ';
 }
 
-void printConfirmPrompt(Turn *turn)
+wc uintToy(const uint n)
 {
-    wprintf(
-        L"Confirm move %wc (%u,%u) to %wc (%u,%u)? (Y/n)...\n",
-        turn->src.piece,
-        turn->src.pos.x,
-        turn->src.pos.y,
-        turn->dst.piece,
-        turn->dst.pos.x,
-        turn->dst.pos.y
-    );
+    if(isValidUint(n))
+        return L'8'-n;
+    return L' ';
+}
+
+void printInputPrompt(const Input in)
+{
+    switch(in.type){
+        case I_INVALID:
+            wprintf(L"Enter turn...\n");
+            break;
+        case I_HALF:
+            wprintf(
+                L"Enter dst -\nsrc %wc (%wc,%wc)...\n",
+                pwc[in.turn.src.piece],
+                uintTox(in.turn.src.pos.x),
+                uintToy(in.turn.src.pos.y)
+            );
+            break;
+        case I_FULL:
+            wprintf(
+                L"Confirm move -\nsrc: %wc (%wc,%wc) -> dst: %wc (%wc,%wc)\n(Y/n)...\n",
+                turn.src.piece,
+                uintTox(in.turn.src.pos.x),
+                uintToy(in.turn.src.pos.y),
+                turn.dst.piece,
+                uintTox(in.turn.dst.pos.x),
+                uintToy(in.turn.dst.pos.y)
+            );
+            break;
+        default:
+            fwprintf(
+                stderr,
+                L"Error: invalid prompt\ntype: %ls\nsrc: %wc {%wc,%wc}\ndst: %wc {%wc,%wc}\n",
+                InputTypeStr[turn.type],
+                turn.src.piece,
+                in.turn.src.pos.x,
+                in.turn.src.pos.y,
+                turn.dst.piece,
+                in.turn.dst.pos.x,
+                in.turn.dst.pos.y
+            );
+            exit(EXIT_FAILURE);
+            break;
+    }
 }
 
 Color gameStateColor(const GameState state)
@@ -114,50 +157,123 @@ void gameStatePrintPrompt(const GameState state)
     }
 }
 
-bool getConfirm(BoardStr str, Turn *turn)
+bool validHalf(wc *buf)
 {
-    clearTerm();
-    wprintf(L"Are you sure -\n%ls\n", str);
-    printConfirmPrompt(turn);
-
-    int ans = fgetc(stdin);
-    int nxt = ' ';
-    if(ans == '\n')
-        return true;
-    if((ans == 'y' || ans == 'Y') && (nxt = fgetc(stdin)) == '\n')
-        return true;
-    while(nxt != '\n')
-        nxt = fgetc(stdin);
-    return false;
+    if(strnlen(buf, 6) != 3)
+        return false;
+    for(uint i = 0; i < 2; i++){
+        if(coordToUint(buf[i]) == 9)
+            return false;
+    }
+    return buf[4] != '\n';
 }
 
-// a3b3n :5
-bool getTurnInput(Turn *turn)
+bool validFull(wc *buf)
 {
-    printMovePrompt();
+    if(strnlen(buf, 6) != 5)
+        return false;
+    for(uint i = 0; i < 4; i++){
+        if(coordToUint(buf[i]) == 9)
+            return false;
+    }
+    return buf[4] != '\n';
+}
+
+Vec2 bufToVec2(wc *buf)
+{
+    return (const Vec2){
+        .x = coordToUint(buf[0]),
+        .y = coordToUint(buf[1])
+    };
+}
+
+// "a3b3\n" len: 5
+// "c4\n"   len: 3
+Input getInput(Input in, Board board, const Color color)
+{
+    if(color == C_NONE){
+        fwprintf(stderr, L"Error: cannot get input for color C_NONE\n");
+        exit(EXIT_FAILURE);
+    }
+    printInputPrompt(in);
     char buf[6] = {'\0'};
     if(!fgets(buf, 6, stdin)){
-        fwprintf(stderr, L"Error: input\n");
+        fwprintf(stderr, L"Error: fgets returned NULL\n");
         exit(EXIT_FAILURE);
     }
 
-    uint i = strnlen(buf, 6);
-    if(i < 5)
-        return false;
-    if(i == 6){
-        int c = buf[5];
-        while(c != '\n')
-            c = fgetc(stdin);
-        return false;
+    uint buflen = strnlen(buf, 6);
+    if(buflen == 6){
+        while(buf[5] != '\n')
+            buf[5] = fgetc(stdin);
+        in.type = I_INVALID;
+        return in;
     }
-    if(isValidAlpha(buf[0]) && isValidNum(buf[1]) && isValidAlpha(buf[2]) && isValidNum(buf[3])){
-        turn->src.pos.x = coordToUint(buf[0]);
-        turn->src.pos.y = coordToUint(buf[1]);
-        turn->dst.pos.x = coordToUint(buf[2]);
-        turn->dst.pos.y = coordToUint(buf[3]);
-        return validPos(turn->src.pos, false) && validPos(turn->dst.pos, false);
+
+    switch(in.type){
+        case I_INVALID:
+            if(
+                buflen == 3 &&
+                validHalf(buf) &&
+                pieceColor(in.turn.src.piece) == color
+            ){
+                in.type = I_HALF;
+                in.src.pos  = bufToVec2(buf);
+                in.src.piece = pieceAt(board, in.src.pos);
+                return in;
+            }
+            if(
+                buflen == 5 &&
+                validFull(buf) &&
+                pieceColor(in.turn.src.piece) == color
+            ){
+                in.type = I_FULL;
+                in.src.pos  = bufToVec2(buf);
+                in.dst.pos  = bufToVec2(&buf[2]);
+                in.src.piece = pieceAt(board, in.src.pos);
+                in.dst.piece = pieceAt(board, in.dst.pos);
+                return in;
+            }
+            break;
+        case I_HALF:
+            if(
+                buflen == 3 &&
+                validHalf(buf) &&
+                pieceColor(in.turn.src.piece) == color
+            ){
+                in.type = I_FULL;
+                in.dst.pos  = bufToVec2(buf);
+                in.dst.piece = pieceAt(board, in.dst.pos);
+                return in;
+            }
+            break;
+        case I_FULL:
+            if(
+                ((buflen == 2 && (buf[0] == 'y' || buf[0] == 'Y') && buf[1] == '\n') ||
+                (buflen == 1 && buf[0] == '\n'))&&
+                pieceColor(in.turn.src.piece) == color
+            ){
+                in.type = I_VALID;
+                return in;
+            }
+            break;
+        default:
+            fwprintf(stderr, L"Error: input default switch case\n");
+            exit(EXIT_FAILURE);
+            break;
     }
-    return false;
+    in.type = I_INVALID;
+    return in;
+}
+
+Input getTurnInput(const GameState state)
+{
+    while(
+        (in = getInput(in, state)).type != I_VALID ||
+        !validPos(in.turn.src.pos, false) ||
+        !validPos(in.turn.dst.pos, false)
+    );
+    return in;
 }
 
 #endif /* end of include guard: IO_H */

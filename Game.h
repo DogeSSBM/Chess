@@ -236,20 +236,30 @@ Turn* nextTurn(Turn *game, GameState state)
     BoardStr str;
     boardStrify(board, str);
 
-    Turn *turn = calloc(1, sizeof(Turn));
-    bool valid;
+    Input in = {0};
     do{
         clearTerm();
         gameStatePrintPrompt(state);
+        if(in.type == I_HALF || in.type == I_FULL){
+            boardStrSelect(str, in.src.pos, L"[]");
+        }
+        if(in.type == I_FULL){
+            boardStrSelect(str, in.src.dst, L"><");
+        }
+        if(in.type == I_HALF){
+            Valid moves;
+            validMovesStateless(board, moves, in.src.pos);
+            selectValid(str, in.src.pos, moves, L"><", L"||");
+        }
         wprintf(str);
-        valid = getTurnInput(turn);
-        Valid moves;
-        validMovesStateless(board, moves, turn->src.pos);
-        selectValid(str, turn->src.pos, moves, L"++", L"--");
-        valid = getValidAt(moves, turn->dst.pos, false);
-    }while(!valid || !getConfirm(str, turn));
-    turn->src.piece = pieceAt(board, turn->src.pos);
-    turn->dst.piece = turn->src.piece;
+        in = getTurnInput(in, gameStateColor(state));
+    }while(
+        in.type != I_VALID ||
+        !getValidAt(moves, in.src.pos, false) ||
+        !getValidAt(moves, in.dst.pos, false)
+    );
+    Turn *turn = calloc(1, sizeof(Turn));
+    *turn = in.turn;
     return game = appendTurn(game, turn);
 }
 

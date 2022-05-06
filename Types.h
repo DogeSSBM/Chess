@@ -82,6 +82,16 @@ typedef struct Turn{
     struct Turn *next;
 }Turn;
 
+typedef enum{I_INVALID, I_HALF, I_FULL, I_VALID, I_N}InputType;
+const wc* InputTypeStr[I_N] = {
+    L"I_INVALID", L"I_HALF", L"I_FULL", L"I_VALID"
+};
+
+typedef struct{
+    InputType type;
+    Turn turn;
+}Input;
+
 Color colorInv(const Color color)
 {
     if(color == C_WHITE)
