@@ -101,7 +101,7 @@ void printInputPrompt(const Input in)
             break;
         case I_HALF:
             wprintf(
-                L"Enter dst -\nsrc %wc (%wc,%wc)...\n",
+                L"Enter dst -\nsrc %lc (%lc,%lc)...\n",
                 pwc[in.turn.src.piece],
                 uintTox(in.turn.src.pos.x),
                 uintToy(in.turn.src.pos.y)
@@ -109,11 +109,11 @@ void printInputPrompt(const Input in)
             break;
         case I_FULL:
             wprintf(
-                L"Confirm move -\nsrc: %wc (%wc,%wc) -> dst: %wc (%wc,%wc)\n(Y/n)...\n",
-                turn.src.piece,
+                L"Confirm move -\nsrc: %lc (%lc,%lc) -> dst: %lc (%lc,%lc)\n(Y/n)...\n",
+                in.turn.src.piece,
                 uintTox(in.turn.src.pos.x),
                 uintToy(in.turn.src.pos.y),
-                turn.dst.piece,
+                in.turn.dst.piece,
                 uintTox(in.turn.dst.pos.x),
                 uintToy(in.turn.dst.pos.y)
             );
@@ -121,14 +121,14 @@ void printInputPrompt(const Input in)
         default:
             fwprintf(
                 stderr,
-                L"Error: invalid prompt\ntype: %ls\nsrc: %wc {%wc,%wc}\ndst: %wc {%wc,%wc}\n",
-                InputTypeStr[turn.type],
-                turn.src.piece,
-                in.turn.src.pos.x,
-                in.turn.src.pos.y,
-                turn.dst.piece,
-                in.turn.dst.pos.x,
-                in.turn.dst.pos.y
+                L"Error: invalid prompt\ntype: %ls\nsrc: %lc {%lc,%lc}\ndst: %lc {%lc,%lc}\n",
+                InputTypeStr[in.type],
+                in.turn.src.piece,
+                uintTox(in.turn.src.pos.x),
+                uintToy(in.turn.src.pos.y),
+                in.turn.dst.piece,
+                uintTox(in.turn.dst.pos.x),
+                uintToy(in.turn.dst.pos.y)
             );
             exit(EXIT_FAILURE);
             break;
@@ -157,7 +157,7 @@ void gameStatePrintPrompt(const GameState state)
     }
 }
 
-bool validHalf(wc *buf)
+bool validHalf(const char *buf)
 {
     if(strnlen(buf, 6) != 3)
         return false;
@@ -168,7 +168,7 @@ bool validHalf(wc *buf)
     return buf[4] != '\n';
 }
 
-bool validFull(wc *buf)
+bool validFull(const char *buf)
 {
     if(strnlen(buf, 6) != 5)
         return false;
@@ -179,7 +179,7 @@ bool validFull(wc *buf)
     return buf[4] != '\n';
 }
 
-Vec2 bufToVec2(wc *buf)
+Vec2 bufToVec2(const char *buf)
 {
     return (const Vec2){
         .x = coordToUint(buf[0]),
@@ -189,8 +189,9 @@ Vec2 bufToVec2(wc *buf)
 
 // "a3b3\n" len: 5
 // "c4\n"   len: 3
-Input getInput(Input in, Board board, const Color color)
+Input getInput(Input in, Board board, const GameState state)
 {
+    const Color color = gameStateColor(state);
     if(color == C_NONE){
         fwprintf(stderr, L"Error: cannot get input for color C_NONE\n");
         exit(EXIT_FAILURE);
@@ -218,8 +219,8 @@ Input getInput(Input in, Board board, const Color color)
                 pieceColor(in.turn.src.piece) == color
             ){
                 in.type = I_HALF;
-                in.src.pos  = bufToVec2(buf);
-                in.src.piece = pieceAt(board, in.src.pos);
+                in.turn.src.pos  = bufToVec2(buf);
+                in.turn.src.piece = pieceAt(board, in.turn.src.pos);
                 return in;
             }
             if(
@@ -228,10 +229,10 @@ Input getInput(Input in, Board board, const Color color)
                 pieceColor(in.turn.src.piece) == color
             ){
                 in.type = I_FULL;
-                in.src.pos  = bufToVec2(buf);
-                in.dst.pos  = bufToVec2(&buf[2]);
-                in.src.piece = pieceAt(board, in.src.pos);
-                in.dst.piece = pieceAt(board, in.dst.pos);
+                in.turn.src.pos  = bufToVec2(buf);
+                in.turn.dst.pos  = bufToVec2(&buf[2]);
+                in.turn.src.piece = pieceAt(board, in.turn.src.pos);
+                in.turn.dst.piece = pieceAt(board, in.turn.dst.pos);
                 return in;
             }
             break;
@@ -242,8 +243,8 @@ Input getInput(Input in, Board board, const Color color)
                 pieceColor(in.turn.src.piece) == color
             ){
                 in.type = I_FULL;
-                in.dst.pos  = bufToVec2(buf);
-                in.dst.piece = pieceAt(board, in.dst.pos);
+                in.turn.dst.pos  = bufToVec2(buf);
+                in.turn.dst.piece = pieceAt(board, in.turn.dst.pos);
                 return in;
             }
             break;
@@ -266,10 +267,11 @@ Input getInput(Input in, Board board, const Color color)
     return in;
 }
 
-Input getTurnInput(const GameState state)
+Input getTurnInput(Board board, const GameState state)
 {
+    Input in = {0};
     while(
-        (in = getInput(in, state)).type != I_VALID ||
+        (in = getInput(in, board, state)).type != I_VALID ||
         !validPos(in.turn.src.pos, false) ||
         !validPos(in.turn.dst.pos, false)
     );

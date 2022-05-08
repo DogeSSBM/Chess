@@ -233,30 +233,31 @@ Turn* nextTurn(Turn *game, GameState state)
 
     Board board;
     consBoardState(board, game);
-    BoardStr str;
-    boardStrify(board, str);
-
     Input in = {0};
+    Valid moves;
     do{
         clearTerm();
+        BoardStr str;
+        boardStrify(board, str);
         gameStatePrintPrompt(state);
         if(in.type == I_HALF || in.type == I_FULL){
-            boardStrSelect(str, in.src.pos, L"[]");
+            validMovesStateless(board, moves, in.turn.src.pos);
+            boardStrSelect(str, in.turn.src.pos, L"[]");
         }
         if(in.type == I_FULL){
-            boardStrSelect(str, in.src.dst, L"><");
+            validMovesStateless(board, moves, in.turn.src.pos);
+            boardStrSelect(str, in.turn.dst.pos, L"><");
         }
         if(in.type == I_HALF){
-            Valid moves;
-            validMovesStateless(board, moves, in.src.pos);
-            selectValid(str, in.src.pos, moves, L"><", L"||");
+            validMovesStateless(board, moves, in.turn.src.pos);
+            selectValid(str, in.turn.src.pos, moves, L"><", L"||");
         }
         wprintf(str);
-        in = getTurnInput(in, gameStateColor(state));
+        in = getInput(in, board, state);
     }while(
         in.type != I_VALID ||
-        !getValidAt(moves, in.src.pos, false) ||
-        !getValidAt(moves, in.dst.pos, false)
+        !getValidAt(moves, in.turn.src.pos, false) ||
+        !getValidAt(moves, in.turn.dst.pos, false)
     );
     Turn *turn = calloc(1, sizeof(Turn));
     *turn = in.turn;
