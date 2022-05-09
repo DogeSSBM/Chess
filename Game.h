@@ -55,10 +55,31 @@ Color pieceColor(const Piece piece)
     return piece > P_KING_W ? C_BLACK : C_WHITE;
 }
 
+bool isEnPassant(Board board, Turn *turn)
+{
+    if(pieceAt(board, turn->dst.pos) != P_EMPTY)
+        return false;
+    if(
+        (turn->src.piece == P_PAWN_B && turn->dst.piece == P_PAWN_B) ||
+        (turn->src.piece == P_PAWN_W && turn->dst.piece == P_PAWN_W)
+    ){
+        return turn->src.pos.x != turn->dst.pos.x;
+    }
+    return false;
+}
+
 Turn *applyTurn(Board board, Turn *turn)
 {
     if(!turn)
         return NULL;
+    if(isEnPassant(board, turn)){
+        const Piece capPiece = turn->src.piece == P_PAWN_B ? P_PAWN_W : P_PAWN_B;
+        const Dir bdir = turn->src.piece == P_PAWN_B ? D_U : D_D;
+        if(pieceSet(board, shift(turn->dst.pos, bdir, 1), P_EMPTY) != capPiece){
+            fwprintf(stderr, L"Error: enpassant error");
+            exit(EXIT_FAILURE);
+        }
+    }
     if(pieceSet(board, turn->src.pos, P_EMPTY) != turn->src.piece){
         fwprintf(
             stderr,
