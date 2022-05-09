@@ -245,14 +245,9 @@ uint validMovesStateless(Board board, Valid moves, const Vec2 pos)
     const Color srcColor = pieceColor(srcPiece);
     if(srcColor == C_NONE){
         return 0;
-        // fwprintf(stderr, L"Error: cannot get validMoves for blank square\n");
-        // exit(EXIT_FAILURE);
+        fwprintf(stderr, L"Error: cannot get validMoves for blank square\n");
+        exit(EXIT_FAILURE);
     }
-
-    BoardStr str;
-    boardStrify(board, str);
-
-    wprintf(L"Piece: %lc at: %ls\n", pwc[srcPiece], vec2Strify(pos));
 
     uint total = 0;
     switch(srcPiece){
@@ -287,13 +282,29 @@ uint validMovesStateless(Board board, Valid moves, const Vec2 pos)
             break;
     }
 
-    selectValid(str, pos, moves, L"++", L"--");
-    wprintf(
-        L"------------moves------------\n%ls\ntotal: %u\n------------done------------\n",
-        str,
-        total
-    );
     return 0;
+}
+
+uint validMoves(Turn *game, Valid moves, const Vec2 pos)
+{
+    resetValid(moves);
+    Board board;
+    Turn *last = consBoardState(board, game);
+    const Piece piece = pieceAt(board, pos);
+    uint total = validMovesStateless(board, moves, pos);
+    if((piece == P_PAWN_B || piece == P_PAWN_W) && pawnDoubleMove(last)){
+        Vec2 temp;
+        const Dir fdir = piece == P_PAWN_B ? D_D : D_U;
+        if(eqVec2((temp = shift(pos, D_L, 1)), last->dst.pos)){
+            setValidAt(moves, shift(temp, fdir, 1), true, true);
+            total++;
+        }
+        if(eqVec2((temp = shift(pos, D_R, 1)), last->dst.pos)){
+            setValidAt(moves, shift(temp, fdir, 1), true, true);
+            total++;
+        }
+    }
+    return total;
 }
 
 Turn* turnPosChanged(Turn *game, const Vec2 pos)

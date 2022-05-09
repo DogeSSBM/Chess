@@ -19,14 +19,15 @@ void boardStrify(Board board, BoardStr str)
     wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
     wcscat(str, L"  +---+---+---+---+---+---+---+---+\n");
     for(int y = 0; y < 8; y++){
-        swprintf(str+wcslen(str), 708, L"%lc |", btowc('8'-y));
+        swprintf(str+wcslen(str), BOARDSTRLEN, L"%lc |", btowc('8'-y));
         for(int x = 0; x < 8; x++){
-            swprintf(str+wcslen(str), 708, L" %lc |", pwc[board[y][x]]);
+            swprintf(str+wcslen(str), BOARDSTRLEN, L" %lc |", pwc[board[y][x]]);
         }
-        swprintf(str+wcslen(str), 708, L" %lc \n", btowc('8'-y));
+        swprintf(str+wcslen(str), BOARDSTRLEN, L" %lc \n", btowc('8'-y));
         wcscat(str, L"  +---+---+---+---+---+---+---+---+\n");
     }
     wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
+    str[BOARDSTRLEN-1] = '\0';
 }
 
 wc* vec2Strify(const Vec2 pos)
@@ -67,7 +68,7 @@ bool isValidNum(const wc c)
 
 bool isValidUint(const uint n)
 {
-    return n >= 1 && n <= 8;
+    return n <= 8;
 }
 
 uint coordToUint(const wc c)
@@ -187,6 +188,25 @@ Vec2 bufToVec2(const char *buf)
     };
 }
 
+void printInput(const Input in, const bool before)
+{
+    wprintf(L"--------------------%ls--------------------\n", before ? L"BEF" : L"AFT");
+    wprintf(L"type: %ls\n", InputTypeStr[in.type]);
+    wprintf(
+        L"src -\n\tpiece: %lc\n\tpos: (%i,%i)\n",
+        pwc[in.turn.src.piece],
+        in.turn.src.pos.x,
+        in.turn.src.pos.y
+    );
+    wprintf(
+        L"dst -\n\tpiece: %lc\n\tpos: (%i,%i)\n",
+        pwc[in.turn.dst.piece],
+        in.turn.dst.pos.x,
+        in.turn.dst.pos.y
+    );
+    wprintf(L"------------------------------------------\n");
+}
+
 // "a3b3\n" len: 5
 // "c4\n"   len: 3
 Input getInput(Input in, Board board, const GameState state)
@@ -211,12 +231,12 @@ Input getInput(Input in, Board board, const GameState state)
         return in;
     }
 
+
     switch(in.type){
         case I_INVALID:
             if(
                 buflen == 3 &&
-                validHalf(buf) &&
-                pieceColor(in.turn.src.piece) == color
+                validHalf(buf)
             ){
                 in.type = I_HALF;
                 in.turn.src.pos  = bufToVec2(buf);
@@ -225,8 +245,7 @@ Input getInput(Input in, Board board, const GameState state)
             }
             if(
                 buflen == 5 &&
-                validFull(buf) &&
-                pieceColor(in.turn.src.piece) == color
+                validFull(buf)
             ){
                 in.type = I_FULL;
                 in.turn.src.pos  = bufToVec2(buf);
@@ -239,12 +258,11 @@ Input getInput(Input in, Board board, const GameState state)
         case I_HALF:
             if(
                 buflen == 3 &&
-                validHalf(buf) &&
-                pieceColor(in.turn.src.piece) == color
+                validHalf(buf)
             ){
                 in.type = I_FULL;
                 in.turn.dst.pos  = bufToVec2(buf);
-                in.turn.dst.piece = pieceAt(board, in.turn.dst.pos);
+                in.turn.dst.piece = in.turn.src.piece;
                 return in;
             }
             break;

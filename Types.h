@@ -1,7 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#define BOARDSTRLEN 708
+#define BOARDSTRLEN 709
 
 typedef wchar_t wc;
 typedef unsigned int uint;

@@ -73,12 +73,15 @@ Turn *applyTurn(Board board, Turn *turn)
     return turn->next;
 }
 
-void consBoardState(Board board, Turn *game)
+Turn* consBoardState(Board board, Turn *game)
 {
     resetBoard(board);
-    while(game)
+    if(!game)
+        return NULL;
+    while(game->next)
         game = applyTurn(board, game);
-
+    applyTurn(board, game);
+    return game;
 }
 
 Turn* appendTurn(Turn *game, Turn *turn)
@@ -101,6 +104,15 @@ Turn* lastTurn(Turn *game)
     while(game->next)
         game = game->next;
     return game;
+}
+
+bool pawnDoubleMove(Turn *turn)
+{
+    if(!turn)
+        return false;
+    return
+        (turn->src.piece == P_PAWN_B && turn->dst.piece == P_PAWN_B && turn->src.pos.y == 1 && turn->dst.pos.y == 3) ||
+        (turn->src.piece == P_PAWN_W && turn->dst.piece == P_PAWN_W && turn->src.pos.y == 6 && turn->dst.pos.y == 4);
 }
 
 Vec2 getKing(Board board, const Color srcColor)
@@ -234,29 +246,28 @@ Turn* nextTurn(Turn *game, GameState state)
     Board board;
     consBoardState(board, game);
     Input in = {0};
+    in.turn.src.piece = P_EMPTY;
+    in.turn.dst.piece = P_EMPTY;
     Valid moves;
     do{
         clearTerm();
         BoardStr str;
         boardStrify(board, str);
         gameStatePrintPrompt(state);
-        if(in.type == I_HALF || in.type == I_FULL){
-            validMovesStateless(board, moves, in.turn.src.pos);
+
+
+        if(in.type == I_HALF){
+            validMoves(game, moves, in.turn.src.pos);
+            selectValid(str, in.turn.src.pos, moves, L"[]", L"><");
+        }else if(in.type == I_FULL){
             boardStrSelect(str, in.turn.src.pos, L"[]");
-        }
-        if(in.type == I_FULL){
-            validMovesStateless(board, moves, in.turn.src.pos);
             boardStrSelect(str, in.turn.dst.pos, L"><");
         }
-        if(in.type == I_HALF){
-            validMovesStateless(board, moves, in.turn.src.pos);
-            selectValid(str, in.turn.src.pos, moves, L"><", L"||");
-        }
-        wprintf(str);
+
+        wprintf(L"%ls", str);
         in = getInput(in, board, state);
     }while(
         in.type != I_VALID ||
-        !getValidAt(moves, in.turn.src.pos, false) ||
         !getValidAt(moves, in.turn.dst.pos, false)
     );
     Turn *turn = calloc(1, sizeof(Turn));
