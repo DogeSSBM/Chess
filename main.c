@@ -5,10 +5,14 @@ int main(void)
     setlocale(LC_ALL, "en_US.utf8");
     Turn *game = NULL;
 
-    GameState state = G_NEUTRAL_W;
-    while(state < G_DRAW){
+    while(1){
+        GameState state = consGameState(game);
+        // BoardStr str;
+        // boardStrify(state.board, str);
+        // selectValid(str, (const Vec2){.x=0,.y=0}, state.moved, L"  ", L"!!");
+        // wprintf(L"Moved -\n%ls\n", str);
         game = nextTurn(game, state);
-        state = evalState(game);
+        state.type = evalState(game);
     }
 
     return 0;

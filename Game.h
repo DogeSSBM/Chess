@@ -68,11 +68,16 @@ bool isEnPassant(Board board, Turn *turn)
     return false;
 }
 
-Turn *applyTurn(Board board, Turn *turn)
+Turn *applyTurn(Board board, Valid moved, Turn *turn, GameStateType *type)
 {
     if(!turn)
         return NULL;
-    if(isEnPassant(board, turn)){
+    if(moved){
+        setValidAt(moved, turn->src.pos, true, true);
+        setValidAt(moved, turn->dst.pos, true, true);
+    }
+    const bool passant = isEnPassant(board, turn);
+    if(passant){
         const Piece capPiece = turn->src.piece == P_PAWN_B ? P_PAWN_W : P_PAWN_B;
         const Dir bdir = turn->src.piece == P_PAWN_B ? D_U : D_D;
         if(pieceSet(board, shift(turn->dst.pos, bdir, 1), P_EMPTY) != capPiece){
@@ -91,17 +96,33 @@ Turn *applyTurn(Board board, Turn *turn)
         exit(EXIT_FAILURE);
     }
     pieceSet(board, turn->dst.pos, turn->dst.piece);
+
+    if(type){
+        switch(gameStateColor(*type)){
+            case C_WHITE:
+                *type = inCheck(board, C_BLACK) ? G_CHECK_B : G_NEUTRAL_B;
+                break;
+            case C_BLACK:
+                *type = inCheck(board, C_WHITE) ? G_CHECK_W : G_NEUTRAL_W;
+                break;
+            default:
+                fwprintf(stderr, L"Error: gameStateColor err\n");
+                exit(EXIT_FAILURE);
+                break;
+        }
+    }
     return turn->next;
 }
 
-Turn* consBoardState(Board board, Turn *game)
+Turn* consBoardState(Board board, Valid moved, Turn *game, GameStateType *type)
 {
     resetBoard(board);
+    resetValid(moved);
     if(!game)
         return NULL;
     while(game->next)
-        game = applyTurn(board, game);
-    applyTurn(board, game);
+        game = applyTurn(board, moved, game, type);
+    applyTurn(board, moved, game, type);
     return game;
 }
 
@@ -191,7 +212,7 @@ bool movesCanEscapeCheck(Board board, Valid moves, const Vec2 src, const Color s
             Turn turn = {.src.pos = src, .dst.pos = dst};
             Board applied;
             boardCpy(applied, board);
-            applyTurn(applied, &turn);
+            applyTurn(applied, NULL, &turn, NULL);
             if(!inCheck(applied, srcColor))
                 return true;
         }
@@ -203,7 +224,9 @@ bool inCheckMate(Turn *game, const Color srcColor)
 {
     Board board;
     resetBoard(board);
-    consBoardState(board, game);
+    Valid moved;
+    GameStateType type = G_NEUTRAL_W;
+    consBoardState(board, moved, game, &type);
     if(!inCheck(board, srcColor))
         return false;
 
@@ -255,17 +278,15 @@ bool inCheckMate(Turn *game, const Color srcColor)
 
 Turn* nextTurn(Turn *game, GameState state)
 {
-    if(state >= G_DRAW){
+    if(state.type >= G_DRAW){
         fwprintf(
             stderr,
             L"Error: can't nextTurn() when GameState == %ls\n",
-            GameStateStr[state]
+            GameStateTypeStr[state.type]
         );
         exit(EXIT_FAILURE);
     }
 
-    Board board;
-    consBoardState(board, game);
     Input in = {0};
     in.turn.src.piece = P_EMPTY;
     in.turn.dst.piece = P_EMPTY;
@@ -273,9 +294,8 @@ Turn* nextTurn(Turn *game, GameState state)
     do{
         clearTerm();
         BoardStr str;
-        boardStrify(board, str);
-        gameStatePrintPrompt(state);
-
+        boardStrify(state.board, str);
+        gameStatePrintPrompt(state.type);
 
         if(in.type == I_HALF){
             validMoves(game, moves, in.turn.src.pos);
@@ -286,7 +306,7 @@ Turn* nextTurn(Turn *game, GameState state)
         }
 
         wprintf(L"%ls", str);
-        in = getInput(in, board, state);
+        in = getInput(in, state.board, state.type);
     }while(
         in.type != I_VALID ||
         !getValidAt(moves, in.turn.dst.pos, false)
@@ -296,7 +316,7 @@ Turn* nextTurn(Turn *game, GameState state)
     return game = appendTurn(game, turn);
 }
 
-GameState evalState(Turn *game)
+GameStateType evalState(Turn *game)
 {
     if(!game){
         fwprintf(stderr, L"Error: game should contain at least one turn\n");
@@ -307,6 +327,14 @@ GameState evalState(Turn *game)
     if(pieceColor(last->src.piece) == C_WHITE)
         return G_NEUTRAL_B;
     return G_NEUTRAL_W;
+}
+
+GameState consGameState(Turn *game)
+{
+    GameState ret = {0};
+    ret.type = G_NEUTRAL_W;
+    ret.last = consBoardState(ret.board, ret.moved, game, &ret.type);
+    return ret;
 }
 
 #endif /* end of include guard: GAME_H */

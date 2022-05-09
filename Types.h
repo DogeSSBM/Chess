@@ -34,11 +34,6 @@ typedef wc BoardStr[BOARDSTRLEN];
 
 typedef bool Valid[8][8];
 
-typedef enum{G_NEUTRAL_W, G_NEUTRAL_B, G_CHECK_W, G_CHECK_B, G_DRAW, G_MATE_W, G_MATE_B, G_N}GameState;
-const wc *GameStateStr[G_N] = {
-    L"G_NEUTRAL_W", L"G_NEUTRAL_B", L"G_CHECK_W", L"G_CHECK_B", L"G_DRAW", L"G_MATE_W", L"G_MATE_B"
-};
-
 const wc pwc[P_N] = {
     L'♟', L'♜', L'♞', L'♝', L'♛', L'♚',
     L'♙', L'♖', L'♘', L'♗', L'♕', L'♔',
@@ -54,9 +49,13 @@ const wc pch[P_N] = {
 typedef enum{
     C_NONE, C_WHITE, C_BLACK, C_N
 }Color;
-
 const wc *ColorStr[C_N] = {
     L"C_NONE", L"C_WHITE", L"C_BLACK"
+};
+
+typedef enum{G_NEUTRAL_W, G_NEUTRAL_B, G_CHECK_W, G_CHECK_B, G_DRAW, G_MATE_W, G_MATE_B, G_N}GameStateType;
+const wc *GameStateTypeStr[G_N] = {
+    L"G_NEUTRAL_W", L"G_NEUTRAL_B", L"G_CHECK_W", L"G_CHECK_B", L"G_DRAW", L"G_MATE_W", L"G_MATE_B"
 };
 
 typedef enum{
@@ -81,6 +80,13 @@ typedef struct Turn{
     }dst;
     struct Turn *next;
 }Turn;
+
+typedef struct{
+    GameStateType type;
+    Board board;
+    Turn *last;
+    Valid moved;
+}GameState;
 
 typedef enum{I_INVALID, I_HALF, I_FULL, I_VALID, I_N}InputType;
 const wc* InputTypeStr[I_N] = {

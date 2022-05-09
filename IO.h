@@ -50,7 +50,7 @@ void selectValid(BoardStr str, const Vec2 src, Valid moves, wc srcBraces[2], wc 
             const Vec2 pos = {.x = x, .y = y};
             if(eqVec2(pos, src))
                 boardStrSelect(str, pos, srcBraces);
-            else if(getValidAt(moves, pos, true))
+            if(getValidAt(moves, pos, true))
                 boardStrSelect(str, pos, validBraces);
         }
     }
@@ -136,18 +136,18 @@ void printInputPrompt(const Input in)
     }
 }
 
-Color gameStateColor(const GameState state)
+Color gameStateColor(const GameStateType type)
 {
-    if(state == G_NEUTRAL_W || state == G_CHECK_W || state == G_MATE_W)
+    if(type == G_NEUTRAL_W || type == G_CHECK_W || type == G_MATE_W)
         return C_WHITE;
-    if(state == G_NEUTRAL_B || state == G_CHECK_B || state == G_MATE_B)
+    if(type == G_NEUTRAL_B || type == G_CHECK_B || type == G_MATE_B)
         return C_BLACK;
     return C_NONE;
 }
 
-void gameStatePrintPrompt(const GameState state)
+void gameStatePrintPrompt(const GameStateType type)
 {
-    const Color color = gameStateColor(state);
+    const Color color = gameStateColor(type);
     if(color == C_WHITE)
         wprintf(L"White's turn -\n");
     else if(color == C_BLACK)
@@ -188,30 +188,9 @@ Vec2 bufToVec2(const char *buf)
     };
 }
 
-void printInput(const Input in, const bool before)
+Input getInput(Input in, Board board, const GameStateType type)
 {
-    wprintf(L"--------------------%ls--------------------\n", before ? L"BEF" : L"AFT");
-    wprintf(L"type: %ls\n", InputTypeStr[in.type]);
-    wprintf(
-        L"src -\n\tpiece: %lc\n\tpos: (%i,%i)\n",
-        pwc[in.turn.src.piece],
-        in.turn.src.pos.x,
-        in.turn.src.pos.y
-    );
-    wprintf(
-        L"dst -\n\tpiece: %lc\n\tpos: (%i,%i)\n",
-        pwc[in.turn.dst.piece],
-        in.turn.dst.pos.x,
-        in.turn.dst.pos.y
-    );
-    wprintf(L"------------------------------------------\n");
-}
-
-// "a3b3\n" len: 5
-// "c4\n"   len: 3
-Input getInput(Input in, Board board, const GameState state)
-{
-    const Color color = gameStateColor(state);
+    const Color color = gameStateColor(type);
     if(color == C_NONE){
         fwprintf(stderr, L"Error: cannot get input for color C_NONE\n");
         exit(EXIT_FAILURE);
@@ -285,11 +264,11 @@ Input getInput(Input in, Board board, const GameState state)
     return in;
 }
 
-Input getTurnInput(Board board, const GameState state)
+Input getTurnInput(Board board, const GameStateType type)
 {
     Input in = {0};
     while(
-        (in = getInput(in, board, state)).type != I_VALID ||
+        (in = getInput(in, board, type)).type != I_VALID ||
         !validPos(in.turn.src.pos, false) ||
         !validPos(in.turn.dst.pos, false)
     );

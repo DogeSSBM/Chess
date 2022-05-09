@@ -11,6 +11,10 @@ void setValidAt(Valid, const Vec2, const bool, const bool);
 Turn* turnPosChanged(Turn *, const Vec2);
 Color pieceColor(const Piece);
 Piece pieceAt(Board, const Vec2);
+Vec2 getKing(Board, const Color);
+bool inCheck(Board, const Color);
+bool movesCanEscapeCheck(Board, Valid, const Vec2, const Color);
+bool inCheckMate(Turn *, const Color);
 
 
 #endif /* end of include guard: DECLS_H */

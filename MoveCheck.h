@@ -289,7 +289,8 @@ uint validMoves(Turn *game, Valid moves, const Vec2 pos)
 {
     resetValid(moves);
     Board board;
-    Turn *last = consBoardState(board, game);
+    Valid moved;
+    Turn *last = consBoardState(board, moved, game, NULL);
     const Piece piece = pieceAt(board, pos);
     uint total = validMovesStateless(board, moves, pos);
     if((piece == P_PAWN_B || piece == P_PAWN_W) && pawnDoubleMove(last)){
