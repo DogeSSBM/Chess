@@ -84,6 +84,7 @@ typedef struct Turn{
 typedef struct{
     GameStateType type;
     Board board;
+    Turn *game;
     Turn *last;
     Valid moved;
 }GameState;

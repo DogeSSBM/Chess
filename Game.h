@@ -333,6 +333,7 @@ GameState consGameState(Turn *game)
 {
     GameState ret = {0};
     ret.type = G_NEUTRAL_W;
+    ret.game = game;
     ret.last = consBoardState(ret.board, ret.moved, game, &ret.type);
     return ret;
 }
