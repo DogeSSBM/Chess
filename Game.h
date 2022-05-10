@@ -68,6 +68,37 @@ bool isEnPassant(Board board, Turn *turn)
     return false;
 }
 
+void applyPassant(Board board, Turn *turn)
+{
+    const Piece capPiece = turn->src.piece == P_PAWN_B ? P_PAWN_W : P_PAWN_B;
+    const Dir bdir = turn->src.piece == P_PAWN_B ? D_U : D_D;
+    if(pieceSet(board, shift(turn->dst.pos, bdir, 1), P_EMPTY) != capPiece){
+        fwprintf(stderr, L"Error: enpassant error");
+        exit(EXIT_FAILURE);
+    }
+}
+
+bool isCastle(Turn *turn)
+{
+    return (
+        turn->src.piece == P_KING_B && turn->dst.piece == P_ROOK_B
+    ) || (
+        turn->src.piece == P_KING_W && turn->dst.piece == P_ROOK_W
+    );
+}
+
+/*
+move king two squares toward rook.
+move rook to square crossed by king.
+*/
+void applyCastle(Board board, Turn *turn)
+{
+    const Dir rookDir = turn->dst.pos.x == 0 ? D_L : D_R;
+    pieceSet(board, shift(turn->src.pos, rookDir, 2), turn->src.piece);
+    pieceSet(board, shift(turn->src.pos, rookDir, 1), turn->dst.piece);
+    pieceSet(board, turn->dst.pos, P_EMPTY);
+}
+
 Turn *applyTurn(Board board, Valid moved, Turn *turn, GameStateType *type)
 {
     if(!turn)
@@ -76,15 +107,11 @@ Turn *applyTurn(Board board, Valid moved, Turn *turn, GameStateType *type)
         setValidAt(moved, turn->src.pos, true, true);
         setValidAt(moved, turn->dst.pos, true, true);
     }
-    const bool passant = isEnPassant(board, turn);
-    if(passant){
-        const Piece capPiece = turn->src.piece == P_PAWN_B ? P_PAWN_W : P_PAWN_B;
-        const Dir bdir = turn->src.piece == P_PAWN_B ? D_U : D_D;
-        if(pieceSet(board, shift(turn->dst.pos, bdir, 1), P_EMPTY) != capPiece){
-            fwprintf(stderr, L"Error: enpassant error");
-            exit(EXIT_FAILURE);
-        }
-    }
+    bool castle = false;
+    if(isEnPassant(board, turn))
+        applyPassant(board, turn);
+    else if((castle = isCastle(turn)))
+        applyCastle(board, turn);
     if(pieceSet(board, turn->src.pos, P_EMPTY) != turn->src.piece){
         fwprintf(
             stderr,
@@ -95,7 +122,8 @@ Turn *applyTurn(Board board, Valid moved, Turn *turn, GameStateType *type)
         );
         exit(EXIT_FAILURE);
     }
-    pieceSet(board, turn->dst.pos, turn->dst.piece);
+    if(!castle)
+        pieceSet(board, turn->dst.pos, turn->dst.piece);
 
     if(type){
         switch(gameStateColor(*type)){
