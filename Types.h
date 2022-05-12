@@ -33,6 +33,7 @@ typedef Piece Board[8][8];
 typedef wc BoardStr[BOARDSTRLEN];
 
 typedef bool Valid[8][8];
+typedef Valid AllValid[8][8];
 
 const wc pwc[P_N] = {
     L'♟', L'♜', L'♞', L'♝', L'♛', L'♚',
@@ -84,6 +85,7 @@ typedef struct Turn{
 typedef struct{
     GameStateType type;
     Board board;
+    AllValid all;
     Turn *game;
     Turn *last;
     Valid moved;

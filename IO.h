@@ -122,8 +122,7 @@ void printInputPrompt(const Input in)
         default:
             fwprintf(
                 stderr,
-                L"Error: invalid prompt\ntype: %ls\nsrc: %lc {%lc,%lc}\ndst: %lc {%lc,%lc}\n",
-                InputTypeStr[in.type],
+                L"Invalid input -\nsrc: %lc (%lc,%lc) -> dst: %lc (%lc,%lc)\nEnter turn...\n",
                 in.turn.src.piece,
                 uintTox(in.turn.src.pos.x),
                 uintToy(in.turn.src.pos.y),
@@ -131,7 +130,6 @@ void printInputPrompt(const Input in)
                 uintTox(in.turn.dst.pos.x),
                 uintToy(in.turn.dst.pos.y)
             );
-            exit(EXIT_FAILURE);
             break;
     }
 }
@@ -210,8 +208,14 @@ Input getInput(Input in, Board board, const GameStateType type)
         return in;
     }
 
+    fputs("Henlo!?!?\n", stdout);
+    printf("buf: \"%6s\"\n", buf);
+    fflush(stdout);
 
     switch(in.type){
+        case I_VALID:
+            return in;
+            break;
         case I_INVALID:
             if(
                 buflen == 3 &&
@@ -256,7 +260,14 @@ Input getInput(Input in, Board board, const GameStateType type)
             }
             break;
         default:
-            fwprintf(stderr, L"Error: input default switch case\n");
+            fwprintf(stderr, L"Error: input default switch case\nsrc: %lc (%lc,%lc) -> dst: %lc (%lc,%lc)\nEnter turn...\n",
+            in.turn.src.piece,
+            uintTox(in.turn.src.pos.x),
+            uintToy(in.turn.src.pos.y),
+            in.turn.dst.piece,
+            uintTox(in.turn.dst.pos.x),
+            uintToy(in.turn.dst.pos.y)
+        );
             exit(EXIT_FAILURE);
             break;
     }
