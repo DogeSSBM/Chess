@@ -285,26 +285,100 @@ uint validMovesStateless(Board board, Valid moves, const Vec2 pos)
     return 0;
 }
 
-uint validMoves(Turn *game, Valid moves, const Vec2 pos)
+uint passantMoves(Board board, Valid moves, const Vec2 src, Turn *last)
+{
+    const Piece srcPiece = pieceAt(board, src);
+    if(srcPiece != P_PAWN_B && srcPiece != P_PAWN_W){
+        fwprintf(stderr, L"Error: cannot get passantMoves for non pawn at %ls\n", vec2Strify(src));
+        exit(EXIT_FAILURE);
+    }
+    if(!pawnDoubleMove(last))
+        return 0;
+    Vec2 temp;
+    const Dir fdir = srcPiece == P_PAWN_B ? D_D : D_U;
+    if(eqVec2((temp = shift(src, D_L, 1)), last->dst.pos)){
+        setValidAt(moves, shift(temp, fdir, 1), true, true);
+        return 1;
+    }
+    if(eqVec2((temp = shift(src, D_R, 1)), last->dst.pos)){
+        setValidAt(moves, shift(temp, fdir, 1), true, true);
+        return 1;
+    }
+    return 0;
+}
+
+uint castleMoves(Board board, Valid moves, Valid moved, const Vec2 src)
+{
+    const Piece srcPiece = pieceAt(board, src);
+    Piece rookPiece;
+    Vec2 r[2];
+    if(srcPiece == P_KING_B){
+        rookPiece = P_ROOK_B;
+        r[0] = (Vec2){.x = 0, .y = 0};
+        r[1] = (Vec2){.x = 7, .y = 0};
+    }else if(srcPiece == P_KING_W){
+        rookPiece = P_ROOK_W;
+        r[0] = (Vec2){.x = 0, .y = 7};
+        r[1] = (Vec2){.x = 7, .y = 7};
+    }else{
+        fwprintf(stderr, L"Error: cannot get castleMoves for non king at %ls\n", vec2Strify(src));
+        exit(EXIT_FAILURE);
+    }
+
+    const Color srcColor = pieceColor(srcPiece);
+    if(inCheck(board, srcColor))
+        return 0;
+
+    uint total = 0;
+    const Dir d[2] = {D_L, D_R};
+    for(uint i = 0; i < 2; i++){
+        if(getValidAt(moved, r[i], true))
+            continue;
+        Board test;
+        boardCpy(test, board);
+        pieceSet(test, src, P_EMPTY);
+        if(pieceSet(test, shift(src, d[i], 1), srcPiece) != P_EMPTY || inCheck(test, srcColor))
+            continue;
+        pieceSet(test, shift(src, d[i], i), P_EMPTY);
+        if(pieceSet(test, shift(src, d[i], 2), srcPiece) != P_EMPTY || inCheck(test, srcColor))
+            continue;
+        Piece testpiece;
+        for(
+            Vec2 testpos = shift(r[i], dirInv(d[i]), 1);
+            (testpiece = pieceAt(board, testpos)) != srcPiece;
+            testpos = shift(testpos, dirInv(d[i]), 1)
+        ){
+            if(testpiece != P_EMPTY)
+                goto skip;
+        }
+        pieceSet(test, r[i], P_EMPTY);
+        pieceSet(test, shift(src, d[i], 1), rookPiece);
+        if(!inCheck(test, srcColor)){
+            setValidAt(moves, r[i], true, true);
+            total++;
+        }
+        skip:;
+    }
+
+    return total;
+}
+
+uint validMoves(Turn *game, Valid moves, const Vec2 src)
 {
     resetValid(moves);
     Board board;
     Valid moved;
     Turn *last = consBoardState(board, moved, game, NULL);
-    const Piece piece = pieceAt(board, pos);
-    uint total = validMovesStateless(board, moves, pos);
-    if((piece == P_PAWN_B || piece == P_PAWN_W) && pawnDoubleMove(last)){
-        Vec2 temp;
-        const Dir fdir = piece == P_PAWN_B ? D_D : D_U;
-        if(eqVec2((temp = shift(pos, D_L, 1)), last->dst.pos)){
-            setValidAt(moves, shift(temp, fdir, 1), true, true);
-            total++;
-        }
-        if(eqVec2((temp = shift(pos, D_R, 1)), last->dst.pos)){
-            setValidAt(moves, shift(temp, fdir, 1), true, true);
-            total++;
-        }
-    }
+    uint total = 0;
+    const Piece srcPiece = pieceAt(board, src);
+
+    if(srcPiece == P_PAWN_B || srcPiece == P_PAWN_W)
+        total += passantMoves(board, moves, src, last);
+
+    if(srcPiece == P_KING_B || srcPiece == P_KING_W)
+        total += castleMoves(board, moves, moved, src);
+
+    total += validMovesStateless(board, moves, src);
     return total;
 }
 
