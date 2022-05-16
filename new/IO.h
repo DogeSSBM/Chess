@@ -12,33 +12,6 @@ void clearTerm(void)
     wprintf(__extension__(L"\e[1;1H\e[2J"));
 }
 
-void boardStrify(Board board, BoardStr str)
-{
-    memset(str, 0, BOARDSTRLEN);
-    wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
-    wcscat(str, L"  +---+---+---+---+---+---+---+---+\n");
-    for(int y = 0; y < 8; y++){
-        swprintf(str+wcslen(str), BOARDSTRLEN, L"%lc |", btowc('8'-y));
-        for(int x = 0; x < 8; x++){
-            swprintf(str+wcslen(str), BOARDSTRLEN, L" %lc |", pwc[board[y][x]]);
-        }
-        swprintf(str+wcslen(str), BOARDSTRLEN, L" %lc \n", btowc('8'-y));
-        wcscat(str, L"  +---+---+---+---+---+---+---+---+\n");
-    }
-    wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
-    str[BOARDSTRLEN-1] = '\0';
-}
-
-wc* vecStrify(const Vec pos)
-{
-    static wc buf[4][64];
-    static uint i = 0;
-    wc* cur = buf[i];
-    swprintf(cur, 64, L"(buf[%u]){%i, %i}", i, pos.x, pos.y);
-    i = (i+1)%4;
-    return cur;
-}
-
 void boardStrSelect(BoardStr str, const Vec pos, wc braces[2])
 {
     const uint index = 37 + pos.y * 36 + (pos.y + 1) * 39 + 4 * pos.x;
@@ -55,29 +28,6 @@ void boardStrSelectValid(BoardStr str, Valid moves, wc braces[2])
                 boardStrSelect(str, pos, braces);
         }
     }
-}
-
-int wcToint(const wc c)
-{
-    if(wcValidNum(c))
-        return L'8' - c;
-    if(wcValidAlpha(c))
-        return c - L'a';
-    return 9;
-}
-
-wc intTox(const int n)
-{
-    if(intValid(n))
-        return L'a'+n;
-    return L' ';
-}
-
-wc intToy(const int n)
-{
-    if(intValid(n))
-        return L'8'-n;
-    return L' ';
 }
 
 void printInputPrompt(const Input in)

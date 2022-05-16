@@ -1,4 +1,6 @@
-#pragma once
+#ifndef INCLUDES_H
+#define INCLUDES_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -17,4 +19,8 @@
 #include "Valid.h"
 #include "Piece.h"
 #include "Board.h"
+#include "Strify.h"
 #include "IO.h"
+
+
+#endif /* end of include guard: INCLUDES_H */
