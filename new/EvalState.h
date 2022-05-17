@@ -46,9 +46,9 @@ bool inCheck(Board board, const Color srcColor)
     return false;
 }
 
-GameStateType evalGameState(const GameState state)
+GameStateType evalGameState( GameState state)
 {
-    if(inCheck(state.playerTurn)){
+    if(inCheck(state.board, state.playerTurn)){
 
     }
 }

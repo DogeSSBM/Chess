@@ -1,6 +1,44 @@
 #ifndef STRIFY_H
 #define STRIFY_H
 
+void boardStrifyNoLines(Board board, BoardStr str)
+{
+    memset(str, 0, BOARDSTRLEN);
+    wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
+    wcscat(str, L"  ---------------------------------\n");
+    for(int y = 0; y < 8; y++){
+        swprintf(str+wcslen(str), BOARDSTRLEN, L"%lc |", btowc('8'-y));
+        for(int x = 0; x < 8; x++){
+            swprintf(str+wcslen(str), BOARDSTRLEN, L" %lc %lc", pwc[board[y][x]], x == 7 ? L'|' : L' ');
+        }
+        swprintf(str+wcslen(str), BOARDSTRLEN, L" %lc \n", btowc('8'-y));
+        if(y < 7)
+            wcscat(str, L"  |                               |\n");
+    }
+    wcscat(str, L"  ---------------------------------\n");
+    wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
+    str[BOARDSTRLEN-1] = '\0';
+}
+
+void boardStrifyMids(Board board, BoardStr str)
+{
+    memset(str, 0, BOARDSTRLEN);
+    wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
+    wcscat(str, L"  ---------------------------------\n");
+    for(int y = 0; y < 8; y++){
+        swprintf(str+wcslen(str), BOARDSTRLEN, L"%lc |", btowc('8'-y));
+        for(int x = 0; x < 8; x++){
+            swprintf(str+wcslen(str), BOARDSTRLEN, L" %lc %lc", pwc[board[y][x]], x == 7 ? L'|' : L' ');
+        }
+        swprintf(str+wcslen(str), BOARDSTRLEN, L" %lc \n", btowc('8'-y));
+        if(y < 7)
+            wcscat(str, L"  |   +   +   +   +   +   +   +   |\n");
+    }
+    wcscat(str, L"  ---------------------------------\n");
+    wcscat(str, L"    a   b   c   d   e   f   g   h  \n");
+    str[BOARDSTRLEN-1] = '\0';
+}
+
 void boardStrify(Board board, BoardStr str)
 {
     memset(str, 0, BOARDSTRLEN);

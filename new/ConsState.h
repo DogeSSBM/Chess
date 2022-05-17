@@ -77,8 +77,11 @@ GameState consGameState(Turn *turns)
     GameState ret;
     resetBoard(ret.board);
     resetValid(ret.moved);
-    while(turns)
+    while(turns){
+        if(!turns->next)
+            ret.last = turns;
         turns = applyTurn(ret, turns);
+    }
     return ret;
 }
 

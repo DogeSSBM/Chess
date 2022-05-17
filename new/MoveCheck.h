@@ -325,26 +325,26 @@ uint castleMoves(Board board, Valid moves, Valid moved, const Vec src)
             setValidAt(moves, r[i], true, true);
             total++;
         }
-        skip:;
+        skip:
+        ;
     }
 
     return total;
 }
 
-uint validMoves(Turn *game, Valid moves, const Vec src)
+uint validMoves(GameState state, Valid moves, const Vec src)
 {
     resetValid(moves);
-    GameState state = consGameState(game);
     uint total = 0;
-    const Piece srcPiece = boardAt(board, src);
+    const Piece srcPiece = boardAt(state.board, src);
 
     if(srcPiece == P_PAWN_B || srcPiece == P_PAWN_W)
-        total += passantMoves(board, moves, src, last);
+        total += passantMoves(state.board, moves, src, state.last);
 
     if(srcPiece == P_KING_B || srcPiece == P_KING_W)
-        total += castleMoves(board, moves, moved, src);
+        total += castleMoves(state.board, moves, state.moved, src);
 
-    total += validMovesStateless(board, moves, src);
+    total += validMovesStateless(state.board, moves, src);
     return total;
 }
 

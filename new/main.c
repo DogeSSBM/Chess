@@ -9,7 +9,15 @@ int main(void)
         // cons game state
         GameState state = consGameState(turns);
         // eval board state
-        GameStateType stateType = evalGameState(state);
+        // GameStateType stateType = evalGameState(state);
+        BoardStr str;
+        boardStrify(state.board, str);
+        wprintf(L"%ls\n\n", str);
+        boardStrifyMids(state.board, str);
+        wprintf(L"%ls\n\n", str);
+        boardStrifyNoLines(state.board, str);
+        wprintf(L"%ls\n\n", str);
+        return 0;
         // get player move
         // append move
     }
