@@ -9,7 +9,7 @@ Vec VecAbsDif(const Vec p1, const Vec p2)
     };
 }
 
-bool VecEq(const Vec p1, const Vec p2)
+bool vecEq(const Vec p1, const Vec p2)
 {
     return p1.x == p2.x && p1.y == p2.y;
 }

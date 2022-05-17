@@ -21,6 +21,9 @@
 #include "Board.h"
 #include "Strify.h"
 #include "IO.h"
+#include "MoveCheck.h"
+#include "ConsState.h"
+#include "EvalState.h"
 
 
 #endif /* end of include guard: INCLUDES_H */

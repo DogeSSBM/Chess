@@ -24,7 +24,16 @@ int wcToint(const wc c)
         return L'8' - c;
     if(wcValidAlpha(c))
         return c - L'a';
-    return 9;
+    return -1;
+}
+
+int charToint(const char c)
+{
+    if(charValidNum(c))
+        return L'8' - c;
+    if(charValidAlpha(c))
+        return c - L'a';
+    return -1;
 }
 
 wc intTox(const int n)
@@ -59,11 +68,6 @@ wc* vecStrifyIo(const Vec pos)
     swprintf(cur, 64, L"[%u]:\"%lc%lc\"", i, intTox(pos.x), intToy(pos.y));
     i = (i+1)%4;
     return cur;
-}
-
-Vec parseVec(wc *c)
-{
-    
 }
 
 #endif /* end of include guard: STRIFY_H */

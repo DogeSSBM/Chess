@@ -99,59 +99,43 @@ void applyCastle(Board board, Turn *turn)
     pieceSet(board, turn->dst.pos, P_EMPTY);
 }
 
-Turn *applyTurn(Board board, Valid moved, Turn *turn, GameStateType *type)
+Turn *applyTurn(GameState state, Turn *turn)
 {
     if(!turn)
         return NULL;
-    if(moved){
-        setValidAt(moved, turn->src.pos, true, true);
-        setValidAt(moved, turn->dst.pos, true, true);
-    }
+    setValidAt(statemoved, turn->src.pos, true, true);
+    setValidAt(statemoved, turn->dst.pos, true, true);
     bool castle = false;
-    if(isEnPassant(board, turn))
-        applyPassant(board, turn);
+    if(isEnPassant(state.board, turn))
+        applyPassant(state.board, turn);
     else if((castle = isCastle(turn)))
-        applyCastle(board, turn);
-    if(pieceSet(board, turn->src.pos, P_EMPTY) != turn->src.piece){
+        applyCastle(state.board, turn);
+    if(pieceSet(state.board, turn->src.pos, P_EMPTY) != turn->src.piece){
         fwprintf(
             stderr,
             L"Error: board piece: '%lc' doesn't match move piece: '%lc' at: %ls\n",
-            pwc[pieceAt(board, turn->src.pos)],
+            pwc[pieceAt(state.board, turn->src.pos)],
             pwc[turn->src.piece],
             vec2Strify(turn->src.pos)
         );
         exit(EXIT_FAILURE);
     }
     if(!castle)
-        pieceSet(board, turn->dst.pos, turn->dst.piece);
+        pieceSet(state.board, turn->dst.pos, turn->dst.piece);
 
-    if(type){
-        switch(gameStateColor(*type)){
-            case C_WHITE:
-                *type = inCheck(board, C_BLACK) ? G_CHECK_B : G_NEUTRAL_B;
-                break;
-            case C_BLACK:
-                *type = inCheck(board, C_WHITE) ? G_CHECK_W : G_NEUTRAL_W;
-                break;
-            default:
-                fwprintf(stderr, L"Error: gameStateColor err\n");
-                exit(EXIT_FAILURE);
-                break;
-        }
-    }
+    state.playerTurn = colorInv(state.playerTurn);
     return turn->next;
 }
 
-Turn* consBoardState(Board board, Valid moved, Turn *game, GameStateType *type)
+GameState consGameState(Turn *turns)
 {
-    resetBoard(board);
-    resetValid(moved);
-    if(!game)
-        return NULL;
-    while(game->next)
-        game = applyTurn(board, moved, game, type);
-    applyTurn(board, moved, game, type);
-    return game;
+    GameState ret = {.playerTurn = C_WHITE};
+    resetBoard(ret.board);
+    resetValid(ret.moved);
+    while(turns)
+        turns = applyTurn(board, moved, turns);
+    applyTurn(board, moved, turns);
+    return turns;
 }
 
 Turn* appendTurn(Turn *game, Turn *turn)

@@ -1,6 +1,16 @@
 #ifndef VALID_H
 #define VALID_H
 
+bool charValidAlpha(const char c)
+{
+    return c >= 'a' && c <= 'h';
+}
+
+bool charValidNum(const char c)
+{
+    return c >= '1' && c <= '8';
+}
+
 bool wcValidAlpha(const wc c)
 {
     return c >= L'a' && c <= L'h';

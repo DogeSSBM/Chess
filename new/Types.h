@@ -78,21 +78,13 @@ typedef struct Turn{
 }Turn;
 
 typedef struct{
-    GameStateType type;
+    Color playerTurn;
     Board board;
-    Turn *game;
-    Turn *last;
     Valid moved;
 }GameState;
 
-typedef enum{I_INVALID, I_HALF, I_FULL, I_VALID, I_N}InputType;
-const wc* InputTypeStr[I_N] = {
-    L"I_INVALID", L"I_HALF", L"I_FULL", L"I_VALID"
-};
-
 typedef struct{
-    InputType type;
-    Turn turn;
+    char str[512];
 }Input;
 
 Color colorInv(const Color color)

@@ -30,48 +30,6 @@ void boardStrSelectValid(BoardStr str, Valid moves, wc braces[2])
     }
 }
 
-void printInputPrompt(const Input in)
-{
-    switch(in.type){
-        case I_INVALID:
-            wprintf(L"Enter turn...\n");
-            break;
-        case I_HALF:
-            wprintf(
-                L"Enter dst -\nsrc %lc (%lc,%lc)...\n",
-                pwc[in.turn.src.piece],
-                intTox(in.turn.src.pos.x),
-                intToy(in.turn.src.pos.y)
-            );
-            break;
-        case I_FULL:
-            wprintf(
-                L"Confirm move -\nsrc: %lc (%lc,%lc) -> dst: %lc (%lc,%lc)\n(Y/n)...\n",
-                in.turn.src.piece,
-                intTox(in.turn.src.pos.x),
-                intToy(in.turn.src.pos.y),
-                in.turn.dst.piece,
-                intTox(in.turn.dst.pos.x),
-                intToy(in.turn.dst.pos.y)
-            );
-            break;
-        default:
-            fwprintf(
-                stderr,
-                L"Error: invalid prompt\ntype: %ls\nsrc: %lc {%lc,%lc}\ndst: %lc {%lc,%lc}\n",
-                InputTypeStr[in.type],
-                in.turn.src.piece,
-                intTox(in.turn.src.pos.x),
-                intToy(in.turn.src.pos.y),
-                in.turn.dst.piece,
-                intTox(in.turn.dst.pos.x),
-                intToy(in.turn.dst.pos.y)
-            );
-            exit(EXIT_FAILURE);
-            break;
-    }
-}
-
 Color gameStateColor(const GameStateType type)
 {
     if(type == G_NEUTRAL_W || type == G_CHECK_W || type == G_MATE_W)
@@ -94,120 +52,31 @@ void gameStatePrintPrompt(const GameStateType type)
     }
 }
 
-bool validHalf(const char *buf)
+Vec vecParse(const Input in)
 {
-    if(strnlen(buf, 6) != 3)
-        return false;
-    for(uint i = 0; i < 2; i++){
-        if(wcToint(buf[i]) == 9)
-            return false;
-    }
-    return buf[4] != '\n';
+    Vec ret = {.x = -1, .y = -1};
+    if(!in.str || strnlen(in.str, 2) != 2)
+        return ret;
+    if((ret.x = charToint(in.str[0])) == -1)
+        return ret;
+    ret.y = charToint(in.str[1]);
+    return ret;
 }
 
-bool validFull(const char *buf)
+Input readInput(void)
 {
-    if(strnlen(buf, 6) != 5)
-        return false;
-    for(uint i = 0; i < 4; i++){
-        if(wcToint(buf[i]) == 9)
-            return false;
-    }
-    return buf[4] != '\n';
-}
-
-Vec bufToVec(const char *buf)
-{
-    return (const Vec){
-        .x = wcToint(buf[0]),
-        .y = wcToint(buf[1])
-    };
-}
-
-Input getInput(Input in, Board board, const GameStateType type)
-{
-    const Color color = gameStateColor(type);
-    if(color == C_NONE){
-        fwprintf(stderr, L"Error: cannot get input for color C_NONE\n");
-        exit(EXIT_FAILURE);
-    }
-    printInputPrompt(in);
-    char buf[6] = {'\0'};
-    if(!fgets(buf, 6, stdin)){
+    Input in = {0};
+    if(!fgets(in.str, 512, stdin)){
         fwprintf(stderr, L"Error: fgets returned NULL\n");
         exit(EXIT_FAILURE);
     }
-
-    uint buflen = strnlen(buf, 6);
-    if(buflen == 6){
-        while(buf[5] != '\n')
-            buf[5] = fgetc(stdin);
-        in.type = I_INVALID;
+    uint buflen = strnlen(in.str, 512);
+    if(buflen == 512){
+        while(in.str[511] != '\n')
+            in.str[511] = fgetc(stdin);
+        in.str[0] = L'\0';
         return in;
     }
-
-
-    switch(in.type){
-        case I_INVALID:
-            if(
-                buflen == 3 &&
-                validHalf(buf)
-            ){
-                in.type = I_HALF;
-                in.turn.src.pos  = bufToVec(buf);
-                in.turn.src.piece = boardAt(board, in.turn.src.pos);
-                return in;
-            }
-            if(
-                buflen == 5 &&
-                validFull(buf)
-            ){
-                in.type = I_FULL;
-                in.turn.src.pos  = bufToVec(buf);
-                in.turn.dst.pos  = bufToVec(&buf[2]);
-                in.turn.src.piece = boardAt(board, in.turn.src.pos);
-                in.turn.dst.piece = boardAt(board, in.turn.dst.pos);
-                return in;
-            }
-            break;
-        case I_HALF:
-            if(
-                buflen == 3 &&
-                validHalf(buf)
-            ){
-                in.type = I_FULL;
-                in.turn.dst.pos  = bufToVec(buf);
-                in.turn.dst.piece = in.turn.src.piece;
-                return in;
-            }
-            break;
-        case I_FULL:
-            if(
-                ((buflen == 2 && (buf[0] == 'y' || buf[0] == 'Y') && buf[1] == '\n') ||
-                (buflen == 1 && buf[0] == '\n'))&&
-                pieceColor(in.turn.src.piece) == color
-            ){
-                in.type = I_VALID;
-                return in;
-            }
-            break;
-        default:
-            fwprintf(stderr, L"Error: input default switch case\n");
-            exit(EXIT_FAILURE);
-            break;
-    }
-    in.type = I_INVALID;
-    return in;
-}
-
-Input getTurnInput(Board board, const GameStateType type)
-{
-    Input in = {0};
-    while(
-        (in = getInput(in, board, type)).type != I_VALID ||
-        !validPos(in.turn.src.pos, false) ||
-        !validPos(in.turn.dst.pos, false)
-    );
     return in;
 }
 
