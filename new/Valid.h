@@ -26,7 +26,7 @@ bool intValid(const int n)
     return n < 8 && n >= 0;
 }
 
-bool validPos(const Vec pos, const bool throw)
+bool vecValid(const Vec pos, const bool throw)
 {
     if(!intValid(pos.x) || !intValid(pos.y)){
         if(throw){
@@ -41,13 +41,13 @@ bool validPos(const Vec pos, const bool throw)
 
 bool getValidAt(Valid moves, const Vec pos, const bool throw)
 {
-    validPos(pos, throw);
+    vecValid(pos, throw);
     return moves[pos.y][pos.x];
 }
 
 void setValidAt(Valid moves, const Vec pos, const bool type, const bool throw)
 {
-    validPos(pos, throw);
+    vecValid(pos, throw);
     moves[pos.y][pos.x] = type;
 }
 

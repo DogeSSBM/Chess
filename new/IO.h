@@ -39,17 +39,13 @@ Color gameStateColor(const GameStateType type)
     return C_NONE;
 }
 
-void gameStatePrintPrompt(const GameStateType type)
+void playerTurnPrompt(const Color playerTurn)
 {
-    const Color color = gameStateColor(type);
-    if(color == C_WHITE)
-        wprintf(L"White's turn -\n");
-    else if(color == C_BLACK)
-        wprintf(L"Black's turn -\n");
-    else{
-        fwprintf(stderr, L"Error: state invalid\n");
+    if(playerTurn == C_NONE){
+        fwprintf(stderr, L"Error: color invalid\n");
         exit(EXIT_FAILURE);
     }
+    wprintf(L"%ls's turn... -\n", ColorStr[playerTurn]);
 }
 
 Vec vecParse(const Input in)
@@ -78,6 +74,20 @@ Input readInput(void)
         return in;
     }
     return in;
+}
+
+bool isPossibleTurn(Turn *turn)
+{
+    return turn && vecValid(turn->src.pos, false) && vecValid(turn->dst.pos, false);
+}
+
+Vec readSrc(Board board, const GameStateType type)
+{
+    playerTurnPrompt(stateTypeColor(type));
+    BoardStr str;
+    boardStrify(board, str);
+    wprintf(L"Select a piece...\n");
+    Vec src = vecParse(readInput());
 }
 
 #endif /* end of include guard: IO_H */

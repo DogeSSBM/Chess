@@ -12,20 +12,10 @@ int main(void)
         BoardStr str;
         boardStrify(state.board, str);
         wprintf(L"%ls\n\n", str);
-
         // eval board state
-        // const GameStateType type = evalGameState(state);
+        const GameStateType type = evalGameState(state);
 
-        for(uint i = 0; i < G_N; i++){
-            const GameStateType type = i;
-            if(isEndGame(type))
-                wprintf(L"%ls... \n%ls is the winner!\n", GameStateTypeStr[type], ColorStr[stateTypeColor(type)]);
-        }
-
-        return 0;
-
-
-
+        while()
         // get player move
         // append move
     }

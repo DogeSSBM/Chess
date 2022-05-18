@@ -1,7 +1,7 @@
 #ifndef MOVECHECK_H
 #define MOVECHECK_H
 
-bool validPos(const Vec2 pos, const bool throw)
+bool vecValid(const Vec2 pos, const bool throw)
 {
     if(pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8){
         if(throw){
@@ -16,13 +16,13 @@ bool validPos(const Vec2 pos, const bool throw)
 
 bool getValidAt(Valid moves, const Vec2 pos, const bool throw)
 {
-    validPos(pos, throw);
+    vecValid(pos, throw);
     return moves[pos.y][pos.x];
 }
 
 void setValidAt(Valid moves, const Vec2 pos, const bool type, const bool throw)
 {
-    validPos(pos, throw);
+    vecValid(pos, throw);
     moves[pos.y][pos.x] = type;
 }
 
