@@ -74,7 +74,10 @@ Turn *applyTurn(GameState state, Turn *turn)
 
 GameState consGameState(Turn *turns)
 {
-    GameState ret;
+    GameState ret = {
+        .turns = turns,
+        .playerTurn = C_WHITE
+    };
     resetBoard(ret.board);
     resetValid(ret.moved);
     while(turns){
@@ -85,17 +88,14 @@ GameState consGameState(Turn *turns)
     return ret;
 }
 
-Turn* appendTurn(Turn *game, Turn *turn)
+Turn* appendTurn(Turn *turns, Turn *turn)
 {
-    if(!game)
+    if(!turns)
         return turn;
     if(!turn)
-        return game;
-    Turn *cur = game;
-    while(cur->next)
-        cur = cur->next;
-    cur->next = turn;
-    return game;
+        return turns;
+    lastTurn(turns)->next = turn;
+    return turns;
 }
 
 #endif /* end of include guard: CONSSTATE_H */

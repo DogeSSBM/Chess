@@ -1,6 +1,49 @@
 #ifndef EVALSTATE_H
 #define EVALSTATE_H
 
+Color stateTypeColor(const GameStateType type)
+{
+    return type & 1 ? C_BLACK : C_WHITE;
+}
+
+GameStateType colorToMate(const Color color)
+{
+    if(color == C_WHITE)
+        return G_MATE_W;
+    if(color == C_BLACK)
+        return G_MATE_B;
+    fwprintf(stderr, L"Error: cannot put color %ls in mate\n", ColorStr[color]);
+    exit(EXIT_FAILURE);
+    return G_NEUTRAL_W;
+}
+
+GameStateType colorToCheck(const Color color)
+{
+    if(color == C_WHITE)
+        return G_CHECK_W;
+    if(color == C_BLACK)
+        return G_CHECK_B;
+    fwprintf(stderr, L"Error: cannot put color %ls in check\n", ColorStr[color]);
+    exit(EXIT_FAILURE);
+    return G_NEUTRAL_W;
+}
+
+GameStateType colorToNeutral(const Color color)
+{
+    if(color == C_WHITE)
+        return G_NEUTRAL_W;
+    if(color == C_BLACK)
+        return G_NEUTRAL_B;
+    fwprintf(stderr, L"Error: no neutral state for color %ls\n", ColorStr[color]);
+    exit(EXIT_FAILURE);
+    return G_NEUTRAL_W;
+}
+
+bool isEndGame(const GameStateType type)
+{
+    return type > G_CHECK_B;
+}
+
 Vec getKing(Board board, const Color srcColor)
 {
     if(srcColor == C_NONE){
@@ -18,6 +61,75 @@ Vec getKing(Board board, const Color srcColor)
     fwprintf(stderr, L"Error: could not find player %ls's king\n", ColorStr[srcColor]);
     exit(EXIT_FAILURE);
     return (const Vec){.x=-1, .y=-1};
+}
+
+bool movesCanEscapeCheck(GameState state, const Vec src)
+{
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec dst = {.x = x, .y = y};
+            if(!getValidAt(state.moved, dst, true))
+                continue;
+            Turn turn = {.src.pos = src, .dst.pos = dst};
+            GameState applied = state;
+            boardCpy(applied.board, state.board);
+            applyTurn(applied, &turn);
+            if(!inCheck(applied.board, state.playerTurn))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool inCheckMate(GameState state)
+{
+    if(!inCheck(state.board, state.playerTurn))
+        return false;
+
+    Vec king;
+    Vec rooks[2];
+    if(state.playerTurn == C_BLACK){
+        king.x=4;
+        king.y=0;
+        rooks[0].x=0;
+        rooks[0].y=0;
+        rooks[1].x=7;
+        rooks[1].y=0;
+    }else if(state.playerTurn == C_WHITE){
+        king.x=4;
+        king.y=7;
+        rooks[0].x=0;
+        rooks[0].y=7;
+        rooks[1].x=7;
+        rooks[1].y=7;
+    }else{
+        fwprintf(stderr, L"Error: player %ls cannot be in mate\n", ColorStr[state.playerTurn]);
+        exit(EXIT_FAILURE);
+    }
+
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec src = {.x = x, .y = y};
+            const Piece srcPiece = boardAt(state.board, src);
+            const Color srcColor = pieceColor(srcPiece);
+            if(srcColor == C_NONE)
+                continue;
+
+            Valid moves;
+            resetValid(moves);
+            validMovesStateless(state.board, moves, src);
+            if(movesCanEscapeCheck(state, src))
+                return false;
+        }
+    }
+
+    if(!getValidAt(state.moved, king, true) && !getValidAt(state.moved, rooks[0], true)){
+        return true;
+    }
+    if(!getValidAt(state.moved, king, true) && !getValidAt(state.moved, rooks[1], true)){
+        return true;
+    }
+    return true;
 }
 
 bool inCheck(Board board, const Color srcColor)
@@ -46,20 +158,23 @@ bool inCheck(Board board, const Color srcColor)
     return false;
 }
 
-GameStateType evalGameState( GameState state)
+GameStateType evalGameState(GameState state)
 {
     if(inCheck(state.board, state.playerTurn)){
-
+        if(!movesCanEscapeCheck(state, getKing(state.board, state.playerTurn)))
+            return colorToMate(state.playerTurn);
+        return colorToCheck(state.playerTurn);
     }
+    return colorToNeutral(state.playerTurn);
 }
 
-Turn* lastTurn(Turn *game)
+Turn* lastTurn(Turn *turns)
 {
-    if(!game)
+    if(!turns)
         return NULL;
-    while(game->next)
-        game = game->next;
-    return game;
+    while(turns->next)
+        turns = turns->next;
+    return turns;
 }
 
 #endif /* end of include guard: EVALSTATE_H */

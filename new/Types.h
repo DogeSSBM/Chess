@@ -81,6 +81,7 @@ typedef struct{
     Color playerTurn;
     Board board;
     Valid moved;
+    Turn *turns;
     Turn *last;
 }GameState;
 

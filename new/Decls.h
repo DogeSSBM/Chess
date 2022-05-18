@@ -7,6 +7,6 @@ void setValidAt(Valid, const Vec, const bool, const bool);
 bool inCheck(Board, const Color);
 Turn* lastTurn(Turn *);
 GameState consGameState(Turn *);
-
+bool inCheck(Board, const Color);
 
 #endif /* end of include guard: DECLS_H */
