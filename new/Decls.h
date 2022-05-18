@@ -8,5 +8,6 @@ bool inCheck(Board, const Color);
 Turn* lastTurn(Turn *);
 GameState consGameState(Turn *);
 bool inCheck(Board, const Color);
+Color stateTypeColor(const GameStateType);
 
 #endif /* end of include guard: DECLS_H */
