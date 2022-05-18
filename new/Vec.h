@@ -22,27 +22,27 @@ bool vecEq(const Vec p1, const Vec p2)
       5  4  3        */
 Dir dirRor(const Dir dir)
 {
-    return (dir+1)%D_N;
+    return (dir+1) % D_N;
 }
 
 Dir dirRoR(const Dir dir)
 {
-    return (dir+2)%D_N;
+    return (dir+2) % D_N;
 }
 
 Dir dirRol(const Dir dir)
 {
-    return (dir+7)%D_N;
+    return (dir+7) % D_N;
 }
 
 Dir dirRoL(const Dir dir)
 {
-    return (dir+6)%D_N;
+    return (dir+6) % D_N;
 }
 
 Dir dirInv(const Dir dir)
 {
-    return (dir+4)%D_N;
+    return (dir+4) % D_N;
 }
 
 int dirX(const Dir dir)
