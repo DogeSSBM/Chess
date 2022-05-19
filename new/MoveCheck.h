@@ -1,22 +1,9 @@
 #ifndef MOVECHECK_H
 #define MOVECHECK_H
 
-bool validPos(const Vec pos, const bool throw)
-{
-    if(pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8){
-        if(throw){
-            fwprintf(stderr, L"Error: %ls out of bounds\n", vecStrify(pos));
-            exit(EXIT_FAILURE);
-        }else{
-            return false;
-        }
-    }
-    return true;
-}
-
 uint cast(Board board, Valid moves, const Vec src, const Dir dir, const uint dist)
 {
-    if(!validPos(src, true))
+    if(!vecValid(src, true))
         return 0;
 
     const Color srcColor = pieceColor(boardAt(board, src));
@@ -29,7 +16,7 @@ uint cast(Board board, Valid moves, const Vec src, const Dir dir, const uint dis
     for(uint i = 1; i <= dirDist; i++){
         const Vec dst = shift(src, dir, i);
 
-        if(!validPos(dst, false))
+        if(!vecValid(dst, false))
             return total;
 
         if(pieceColor(boardAt(board, dst)) == srcColor)
@@ -46,7 +33,7 @@ uint cast(Board board, Valid moves, const Vec src, const Dir dir, const uint dis
 
 uint knightMoves(Board board, Valid moves, const Vec src)
 {
-    if(!validPos(src, true))
+    if(!vecValid(src, true))
         return 0;
 
     const Piece srcPiece = boardAt(board, src);
@@ -62,13 +49,13 @@ uint knightMoves(Board board, Valid moves, const Vec src)
         Vec dst;
         Vec fork = shift(src, d, 1);
 
-        if(validPos(dst = shift(fork,dirRoR(d),2), false)){
+        if(vecValid(dst = shift(fork,dirRoR(d),2), false)){
             if(pieceColor(boardAt(board,dst)) != srcColor){
                 setValidAt(moves, dst, true, true);
                 total++;
             }
         }
-        if(validPos(dst = shift(fork,dirRoL(d),2), false)){
+        if(vecValid(dst = shift(fork,dirRoL(d),2), false)){
             if(pieceColor(boardAt(board,dst)) != srcColor){
                 setValidAt(moves, dst, true, true);
                 total++;
@@ -77,13 +64,13 @@ uint knightMoves(Board board, Valid moves, const Vec src)
 
         fork = shift(src, d, 2);
 
-        if(validPos(dst = shift(fork,dirRoR(d),1), false)){
+        if(vecValid(dst = shift(fork,dirRoR(d),1), false)){
             if(pieceColor(boardAt(board,dst)) != srcColor){
                 setValidAt(moves, dst, true, true);
                 total++;
             }
         }
-        if(validPos(dst = shift(fork,dirRoL(d),1), false)){
+        if(vecValid(dst = shift(fork,dirRoL(d),1), false)){
             if(pieceColor(boardAt(board,dst)) != srcColor){
                 setValidAt(moves, dst, true, true);
                 total++;
@@ -181,14 +168,14 @@ uint pawnMoves(Board board, Valid moves, const Vec src)
 
     uint total = 0;
     const Vec dst = shift(src, fDir, 1);
-    if(!validPos(dst, false))
+    if(!vecValid(dst, false))
         return total;
     if(boardAt(board, dst) == P_EMPTY){
         setValidAt(moves, dst, true, true);
         total++;
         if(first){
             const Vec fDst = shift(src, fDir, 2);
-            if(validPos(fDst, false) && boardAt(board, fDst) == P_EMPTY){
+            if(vecValid(fDst, false) && boardAt(board, fDst) == P_EMPTY){
                 setValidAt(moves, fDst, true, true);
                 total++;
             }
@@ -196,13 +183,13 @@ uint pawnMoves(Board board, Valid moves, const Vec src)
     }
 
     Vec cap = shift(dst, dirRoL(fDir), 1);
-    if(validPos(cap, false) && pieceColor(boardAt(board, cap)) == colorInv(srcColor)){
+    if(vecValid(cap, false) && pieceColor(boardAt(board, cap)) == colorInv(srcColor)){
         setValidAt(moves, cap, true, true);
         total++;
     }
 
     cap = shift(dst, dirRoR(fDir), 1);
-    if(validPos(cap, false) && pieceColor(boardAt(board, cap)) == colorInv(srcColor)){
+    if(vecValid(cap, false) && pieceColor(boardAt(board, cap)) == colorInv(srcColor)){
         setValidAt(moves, cap, true, true);
         total++;
     }
@@ -340,6 +327,24 @@ uint castleMoves(Board board, Valid moves, Valid moved, const Vec src)
     return total;
 }
 
+int invalidateCheckMoves(Board board, Valid moves, const Vec src)
+{
+    int invalid = 0;
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            if(!getValidAt(moves, (const Vec){.x = x, .y = y}), true)
+                continue;
+            const Turn turn = {
+                .src = {
+                    .piece = boardAt(board, src),
+                    .pos = src
+                },
+                .dst = {
+                    .piece
+                }
+            }
+}
+
 uint validMoves(GameState state, Valid moves, const Vec src)
 {
     resetValid(moves);
@@ -354,7 +359,6 @@ uint validMoves(GameState state, Valid moves, const Vec src)
 
     total += validMovesStateless(state.board, moves, src);
 
-    // need to account for moves that place player into check
     return total;
 }
 
@@ -369,6 +373,7 @@ uint validAllMoves(GameState state, AllValid all, const Color color)
 {
     uint total = 0;
     validAllReset(all);
+    const bool check = inCheck(state.board, color);
     for(int y = 0; y < 8; y++){
         for(int x = 0; x < 8; x++){
             const Vec src = {.x = x, .y = y};
@@ -376,8 +381,9 @@ uint validAllMoves(GameState state, AllValid all, const Color color)
             if(
                 (color == C_NONE && srcColor != color) ||
                 (color != C_NONE && srcColor == color)
-            )
+            ){
                 total += validMoves(state, all[x][y], src);
+            }
         }
     }
     return total;

@@ -45,29 +45,34 @@ void applyCastle(Board board, Turn *turn)
     boardSet(board, turn->dst.pos, P_EMPTY);
 }
 
+void applyMove(Board board, Turn turn)
+{
+    bool castle = false;
+    if(isEnPassant(board, turn))
+        applyPassant(board, turn);
+    else if((castle = isCastle(turn)))
+        applyCastle(board, turn);
+    if(boardSet(board, turn.src.pos, P_EMPTY) != turn.src.piece){
+        fwprintf(
+            stderr,
+            L"Error: board piece: '%lc' doesn't match move piece: '%lc' at: %ls\n",
+            pwc[boardAt(board, turn.src.pos)],
+            pwc[turn.src.piece],
+            vecStrify(turn.src.pos)
+        );
+        exit(EXIT_FAILURE);
+    }
+    if(!castle)
+        boardSet(board, turn->dst.pos, turn->dst.piece);
+}
+
 Turn *applyTurn(GameState state, Turn *turn)
 {
     if(!turn)
         return NULL;
     setValidAt(state.moved, turn->src.pos, true, true);
     setValidAt(state.moved, turn->dst.pos, true, true);
-    bool castle = false;
-    if(isEnPassant(state.board, turn))
-        applyPassant(state.board, turn);
-    else if((castle = isCastle(turn)))
-        applyCastle(state.board, turn);
-    if(boardSet(state.board, turn->src.pos, P_EMPTY) != turn->src.piece){
-        fwprintf(
-            stderr,
-            L"Error: board piece: '%lc' doesn't match move piece: '%lc' at: %ls\n",
-            pwc[boardAt(state.board, turn->src.pos)],
-            pwc[turn->src.piece],
-            vecStrify(turn->src.pos)
-        );
-        exit(EXIT_FAILURE);
-    }
-    if(!castle)
-        boardSet(state.board, turn->dst.pos, turn->dst.piece);
+    applyMove(state.board, *turn);
 
     return turn->next;
 }

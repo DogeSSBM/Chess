@@ -44,6 +44,11 @@ bool isEndGame(const GameStateType type)
     return type > G_CHECK_B;
 }
 
+bool isCheck(const GameStateType type)
+{
+    return type == G_CHECK_W || type == G_CHECK_B;
+}
+
 Vec getKing(Board board, const Color srcColor)
 {
     if(srcColor == C_NONE){
