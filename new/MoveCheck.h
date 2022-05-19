@@ -1,6 +1,19 @@
 #ifndef MOVECHECK_H
 #define MOVECHECK_H
 
+bool validPos(const Vec pos, const bool throw)
+{
+    if(pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8){
+        if(throw){
+            fwprintf(stderr, L"Error: %ls out of bounds\n", vecStrify(pos));
+            exit(EXIT_FAILURE);
+        }else{
+            return false;
+        }
+    }
+    return true;
+}
+
 uint cast(Board board, Valid moves, const Vec src, const Dir dir, const uint dist)
 {
     if(!validPos(src, true))
@@ -278,20 +291,16 @@ uint passantMoves(Board board, Valid moves, const Vec src, Turn *last)
 uint castleMoves(Board board, Valid moves, Valid moved, const Vec src)
 {
     const Piece srcPiece = boardAt(board, src);
-    Piece rookPiece;
-    Vec r[2];
-    if(srcPiece == P_KING_B){
-        rookPiece = P_ROOK_B;
-        r[0] = (Vec){.x = 0, .y = 0};
-        r[1] = (Vec){.x = 7, .y = 0};
-    }else if(srcPiece == P_KING_W){
-        rookPiece = P_ROOK_W;
-        r[0] = (Vec){.x = 0, .y = 7};
-        r[1] = (Vec){.x = 7, .y = 7};
-    }else{
+    if(srcPiece != P_KING_B && srcPiece != P_KING_W){
         fwprintf(stderr, L"Error: cannot get castleMoves for non king at %ls\n", vecStrify(src));
         exit(EXIT_FAILURE);
     }
+
+    Piece rookPiece = srcPiece == P_KING_B ? P_ROOK_B : P_ROOK_W;
+    Vec r[2] = {
+        (Vec){.x = 0, .y = srcPiece == P_KING_B ? 0 : 7},
+        (Vec){.x = 7, .y = srcPiece == P_KING_B ? 0 : 7}
+    };
 
     const Color srcColor = pieceColor(srcPiece);
     if(inCheck(board, srcColor))
@@ -328,7 +337,6 @@ uint castleMoves(Board board, Valid moves, Valid moved, const Vec src)
         skip:
         ;
     }
-
     return total;
 }
 
@@ -345,6 +353,33 @@ uint validMoves(GameState state, Valid moves, const Vec src)
         total += castleMoves(state.board, moves, state.moved, src);
 
     total += validMovesStateless(state.board, moves, src);
+
+    // need to account for moves that place player into check
+    return total;
+}
+
+void validAllReset(AllValid all)
+{
+    for(int y = 0; y < 8; y++)
+        for(int x = 0; x < 8; x++)
+            resetValid(all[x][y]);
+}
+
+uint validAllMoves(GameState state, AllValid all, const Color color)
+{
+    uint total = 0;
+    validAllReset(all);
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec src = {.x = x, .y = y};
+            const Color srcColor = pieceColor(boardAt(state.board, src));
+            if(
+                (color == C_NONE && srcColor != color) ||
+                (color != C_NONE && srcColor == color)
+            )
+                total += validMoves(state, all[x][y], src);
+        }
+    }
     return total;
 }
 

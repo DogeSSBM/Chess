@@ -72,11 +72,11 @@ Turn *applyTurn(GameState state, Turn *turn)
     return turn->next;
 }
 
-GameState consGameState(Turn *turns)
+GameState consGameState(Turn *turns, const Color color)
 {
     GameState ret = {
         .turns = turns,
-        .playerTurn = C_WHITE
+        .playerTurn = color
     };
     resetBoard(ret.board);
     resetValid(ret.moved);

@@ -81,13 +81,36 @@ bool isPossibleTurn(Turn *turn)
     return turn && vecValid(turn->src.pos, false) && vecValid(turn->dst.pos, false);
 }
 
-Vec readSrc(Board board, const GameStateType type)
+Vec vecRead(Board board, const GameStateType type)
 {
     playerTurnPrompt(stateTypeColor(type));
     BoardStr str;
     boardStrify(board, str);
     wprintf(L"Select a piece...\n");
-    Vec src = vecParse(readInput());
+    return vecParse(readInput());
+}
+
+void validAllPrint(Board board, AllValid all)
+{
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec src = {.x = x, .y = y};
+            const Piece srcPiece = boardAt(board, src);
+            if(srcPiece != P_EMPTY){
+                BoardStr str;
+                boardStrify(board, str);
+                boardStrSelect(str, src, L"[]");
+                boardStrSelectValid(str, all[x][y], L"><");
+                wprintf(
+                    L"Piece %ls: %lc - %ls\n%ls\n",
+                    PieceStr[srcPiece],
+                    pwc[srcPiece],
+                    vecStrify(src),
+                    str
+                );
+            }
+        }
+    }
 }
 
 #endif /* end of include guard: IO_H */

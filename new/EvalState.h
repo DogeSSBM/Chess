@@ -65,10 +65,11 @@ Vec getKing(Board board, const Color srcColor)
 
 bool movesCanEscapeCheck(GameState state, const Vec src)
 {
+    Valid moves;
     for(int y = 0; y < 8; y++){
         for(int x = 0; x < 8; x++){
             const Vec dst = {.x = x, .y = y};
-            if(!getValidAt(state.moved, dst, true))
+            if(!getValidAt(moves, dst, true))
                 continue;
             Turn turn = {.src.pos = src, .dst.pos = dst};
             GameState applied = state;
@@ -161,10 +162,15 @@ bool inCheck(Board board, const Color srcColor)
 GameStateType evalGameState(GameState state)
 {
     if(inCheck(state.board, state.playerTurn)){
-        if(!movesCanEscapeCheck(state, getKing(state.board, state.playerTurn)))
+        if(inCheckMate(state))
             return colorToMate(state.playerTurn);
+
         return colorToCheck(state.playerTurn);
     }
+    AllValid all;
+    const uint total = validAllMoves(state, all, state.playerTurn);
+    if(total == 0)
+        return G_DRAW;
     return colorToNeutral(state.playerTurn);
 }
 

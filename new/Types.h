@@ -31,10 +31,17 @@ typedef enum{
     P_EMPTY, P_N
 }Piece;
 
+wc *PieceStr[P_N] = {
+    L"P_PAWN_W", L"P_ROOK_W", L"P_KNIGHT_W", L"P_BISHOP_W", L"P_QUEEN_W", L"P_KING_W",
+    L"P_PAWN_B", L"P_ROOK_B", L"P_KNIGHT_B", L"P_BISHOP_B", L"P_QUEEN_B", L"P_KING_B",
+    L"P_EMPTY"
+};
+
 typedef Piece Board[8][8];
 typedef wc BoardStr[BOARDSTRLEN];
 
 typedef bool Valid[8][8];
+typedef Valid AllValid[8][8];
 
 const wc pwc[P_N] = {
     L'♟', L'♜', L'♞', L'♝', L'♛', L'♚',
