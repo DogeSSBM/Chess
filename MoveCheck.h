@@ -1,53 +1,12 @@
 #ifndef MOVECHECK_H
 #define MOVECHECK_H
 
-bool vecValid(const Vec2 pos, const bool throw)
+uint cast(Board board, Valid moves, const Vec src, const Dir dir, const uint dist)
 {
-    if(pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8){
-        if(throw){
-            fwprintf(stderr, L"Error: %ls out of bounds\n", vec2Strify(pos));
-            exit(EXIT_FAILURE);
-        }else{
-            return false;
-        }
-    }
-    return true;
-}
-
-bool getValidAt(Valid moves, const Vec2 pos, const bool throw)
-{
-    vecValid(pos, throw);
-    return moves[pos.y][pos.x];
-}
-
-void setValidAt(Valid moves, const Vec2 pos, const bool type, const bool throw)
-{
-    vecValid(pos, throw);
-    moves[pos.y][pos.x] = type;
-}
-
-void resetValid(Valid moves)
-{
-    for(uint i = 0; i < 8; i++)
-        memset(moves[i], false, sizeof(bool)*8);
-}
-
-uint validCount(Valid moves)
-{
-    uint total = 0;
-    for(uint y = 0; y < 8; y++)
-        for(uint x = 0; x < 8; x++)
-            total += getValidAt(moves, (const Vec2){.x = x, .y = y}, true);
-
-    return total;
-}
-
-uint cast(Board board, Valid moves, const Vec2 src, const Dir dir, const uint dist)
-{
-    if(!validPos(src, true))
+    if(!vecValid(src, true))
         return 0;
 
-    const Color srcColor = pieceColor(pieceAt(board, src));
+    const Color srcColor = pieceColor(boardAt(board, src));
     if(srcColor == C_NONE)
         return 0;
 
@@ -55,31 +14,31 @@ uint cast(Board board, Valid moves, const Vec2 src, const Dir dir, const uint di
     const uint dirDist = dist ? dist : 8;
 
     for(uint i = 1; i <= dirDist; i++){
-        const Vec2 dst = shift(src, dir, i);
+        const Vec dst = shift(src, dir, i);
 
-        if(!validPos(dst, false))
+        if(!vecValid(dst, false))
             return total;
 
-        if(pieceColor(pieceAt(board, dst)) == srcColor)
+        if(pieceColor(boardAt(board, dst)) == srcColor)
             return total;
 
         total++;
         setValidAt(moves, dst, true, true);
 
-        if(colorInv(pieceColor(pieceAt(board, dst))) == srcColor)
+        if(colorInv(pieceColor(boardAt(board, dst))) == srcColor)
             return total;
     }
     return total;
 }
 
-uint knightMoves(Board board, Valid moves, const Vec2 src)
+uint knightMoves(Board board, Valid moves, const Vec src)
 {
-    if(!validPos(src, true))
+    if(!vecValid(src, true))
         return 0;
 
-    const Piece srcPiece = pieceAt(board, src);
+    const Piece srcPiece = boardAt(board, src);
     if(srcPiece != P_KNIGHT_B && srcPiece != P_KNIGHT_W){
-        fwprintf(stderr, L"Error: cannot get knightMoves for non knight at %ls\n", vec2Strify(src));
+        fwprintf(stderr, L"Error: cannot get knightMoves for non knight at %ls\n", vecStrify(src));
         exit(EXIT_FAILURE);
     }
     const Color srcColor = pieceColor(srcPiece);
@@ -87,17 +46,17 @@ uint knightMoves(Board board, Valid moves, const Vec2 src)
     uint total = 0;
     Dir d = D_U;
     for(uint i = 0; i < 4; i++){
-        Vec2 dst;
-        Vec2 fork = shift(src, d, 1);
+        Vec dst;
+        Vec fork = shift(src, d, 1);
 
-        if(validPos(dst = shift(fork,dirRoR(d),2), false)){
-            if(pieceColor(pieceAt(board,dst)) != srcColor){
+        if(vecValid(dst = shift(fork,dirRoR(d),2), false)){
+            if(pieceColor(boardAt(board,dst)) != srcColor){
                 setValidAt(moves, dst, true, true);
                 total++;
             }
         }
-        if(validPos(dst = shift(fork,dirRoL(d),2), false)){
-            if(pieceColor(pieceAt(board,dst)) != srcColor){
+        if(vecValid(dst = shift(fork,dirRoL(d),2), false)){
+            if(pieceColor(boardAt(board,dst)) != srcColor){
                 setValidAt(moves, dst, true, true);
                 total++;
             }
@@ -105,14 +64,14 @@ uint knightMoves(Board board, Valid moves, const Vec2 src)
 
         fork = shift(src, d, 2);
 
-        if(validPos(dst = shift(fork,dirRoR(d),1), false)){
-            if(pieceColor(pieceAt(board,dst)) != srcColor){
+        if(vecValid(dst = shift(fork,dirRoR(d),1), false)){
+            if(pieceColor(boardAt(board,dst)) != srcColor){
                 setValidAt(moves, dst, true, true);
                 total++;
             }
         }
-        if(validPos(dst = shift(fork,dirRoL(d),1), false)){
-            if(pieceColor(pieceAt(board,dst)) != srcColor){
+        if(vecValid(dst = shift(fork,dirRoL(d),1), false)){
+            if(pieceColor(boardAt(board,dst)) != srcColor){
                 setValidAt(moves, dst, true, true);
                 total++;
             }
@@ -122,10 +81,10 @@ uint knightMoves(Board board, Valid moves, const Vec2 src)
     return total;
 }
 
-uint rookMoves(Board board, Valid moves, const Vec2 src)
+uint rookMoves(Board board, Valid moves, const Vec src)
 {
     uint total = 0;
-    const Piece srcPiece = pieceAt(board, src);
+    const Piece srcPiece = boardAt(board, src);
     if(srcPiece != P_ROOK_W && srcPiece != P_ROOK_B){
         fwprintf(stderr, L"Error: cannot get rookMoves for non rook at %ls\n", src);
         exit(EXIT_FAILURE);
@@ -139,10 +98,10 @@ uint rookMoves(Board board, Valid moves, const Vec2 src)
     return total;
 }
 
-uint bishopMoves(Board board, Valid moves, const Vec2 src)
+uint bishopMoves(Board board, Valid moves, const Vec src)
 {
     uint total = 0;
-    const Piece srcPiece = pieceAt(board, src);
+    const Piece srcPiece = boardAt(board, src);
     if(srcPiece != P_BISHOP_W && srcPiece != P_BISHOP_B){
         fwprintf(stderr, L"Error: cannot get bishopMoves for non bishop at %ls\n", src);
         exit(EXIT_FAILURE);
@@ -156,10 +115,10 @@ uint bishopMoves(Board board, Valid moves, const Vec2 src)
     return total;
 }
 
-uint queenMoves(Board board, Valid moves, const Vec2 src)
+uint queenMoves(Board board, Valid moves, const Vec src)
 {
     uint total = 0;
-    const Piece srcPiece = pieceAt(board, src);
+    const Piece srcPiece = boardAt(board, src);
     if(srcPiece != P_QUEEN_W && srcPiece != P_QUEEN_B){
         fwprintf(stderr, L"Error: cannot get queenMoves for non queen at %ls\n", src);
         exit(EXIT_FAILURE);
@@ -173,10 +132,10 @@ uint queenMoves(Board board, Valid moves, const Vec2 src)
     return total;
 }
 
-uint kingMoves(Board board, Valid moves, const Vec2 src)
+uint kingMoves(Board board, Valid moves, const Vec src)
 {
     uint total = 0;
-    const Piece srcPiece = pieceAt(board, src);
+    const Piece srcPiece = boardAt(board, src);
     if(srcPiece != P_KING_W && srcPiece != P_KING_B){
         fwprintf(stderr, L"Error: cannot get kingMoves for non king at %ls\n", src);
         exit(EXIT_FAILURE);
@@ -190,9 +149,9 @@ uint kingMoves(Board board, Valid moves, const Vec2 src)
     return total;
 }
 
-uint pawnMoves(Board board, Valid moves, const Vec2 src)
+uint pawnMoves(Board board, Valid moves, const Vec src)
 {
-    const Piece srcPiece = pieceAt(board, src);
+    const Piece srcPiece = boardAt(board, src);
     const Color srcColor = pieceColor(srcPiece);
     bool first;
     Dir fDir;
@@ -203,34 +162,34 @@ uint pawnMoves(Board board, Valid moves, const Vec2 src)
         fDir = D_D;
         first = src.y == 1;
     }else{
-        fwprintf(stderr, L"Error: cannot get pawnMoves for non pawn at %ls\n", vec2Strify(src));
+        fwprintf(stderr, L"Error: cannot get pawnMoves for non pawn at %ls\n", vecStrify(src));
         exit(EXIT_FAILURE);
     }
 
     uint total = 0;
-    const Vec2 dst = shift(src, fDir, 1);
-    if(!validPos(dst, false))
+    const Vec dst = shift(src, fDir, 1);
+    if(!vecValid(dst, false))
         return total;
-    if(pieceAt(board, dst) == P_EMPTY){
+    if(boardAt(board, dst) == P_EMPTY){
         setValidAt(moves, dst, true, true);
         total++;
         if(first){
-            const Vec2 fDst = shift(src, fDir, 2);
-            if(validPos(fDst, false) && pieceAt(board, fDst) == P_EMPTY){
+            const Vec fDst = shift(src, fDir, 2);
+            if(vecValid(fDst, false) && boardAt(board, fDst) == P_EMPTY){
                 setValidAt(moves, fDst, true, true);
                 total++;
             }
         }
     }
 
-    Vec2 cap = shift(dst, dirRoL(fDir), 1);
-    if(validPos(cap, false) && pieceColor(pieceAt(board, cap)) == colorInv(srcColor)){
+    Vec cap = shift(dst, dirRoL(fDir), 1);
+    if(vecValid(cap, false) && pieceColor(boardAt(board, cap)) == colorInv(srcColor)){
         setValidAt(moves, cap, true, true);
         total++;
     }
 
     cap = shift(dst, dirRoR(fDir), 1);
-    if(validPos(cap, false) && pieceColor(pieceAt(board, cap)) == colorInv(srcColor)){
+    if(vecValid(cap, false) && pieceColor(boardAt(board, cap)) == colorInv(srcColor)){
         setValidAt(moves, cap, true, true);
         total++;
     }
@@ -238,10 +197,10 @@ uint pawnMoves(Board board, Valid moves, const Vec2 src)
     return total;
 }
 
-uint validMovesStateless(Board board, Valid moves, const Vec2 pos)
+uint validMovesStateless(Board board, Valid moves, const Vec pos)
 {
     resetValid(moves);
-    const Piece srcPiece = pieceAt(board, pos);
+    const Piece srcPiece = boardAt(board, pos);
     const Color srcColor = pieceColor(srcPiece);
     if(srcColor == C_NONE){
         return 0;
@@ -285,45 +244,50 @@ uint validMovesStateless(Board board, Valid moves, const Vec2 pos)
     return 0;
 }
 
-uint passantMoves(Board board, Valid moves, const Vec2 src, Turn *last)
+bool pawnDoubleMove(Turn *turn)
 {
-    const Piece srcPiece = pieceAt(board, src);
+    if(!turn)
+        return false;
+    return
+        (turn->src.piece == P_PAWN_B && turn->dst.piece == P_PAWN_B && turn->src.pos.y == 1 && turn->dst.pos.y == 3) ||
+        (turn->src.piece == P_PAWN_W && turn->dst.piece == P_PAWN_W && turn->src.pos.y == 6 && turn->dst.pos.y == 4);
+}
+
+uint passantMoves(Board board, Valid moves, const Vec src, Turn *last)
+{
+    const Piece srcPiece = boardAt(board, src);
     if(srcPiece != P_PAWN_B && srcPiece != P_PAWN_W){
-        fwprintf(stderr, L"Error: cannot get passantMoves for non pawn at %ls\n", vec2Strify(src));
+        fwprintf(stderr, L"Error: cannot get passantMoves for non pawn at %ls\n", vecStrify(src));
         exit(EXIT_FAILURE);
     }
     if(!pawnDoubleMove(last))
         return 0;
-    Vec2 temp;
+    Vec temp;
     const Dir fdir = srcPiece == P_PAWN_B ? D_D : D_U;
-    if(eqVec2((temp = shift(src, D_L, 1)), last->dst.pos)){
+    if(vecEq((temp = shift(src, D_L, 1)), last->dst.pos)){
         setValidAt(moves, shift(temp, fdir, 1), true, true);
         return 1;
     }
-    if(eqVec2((temp = shift(src, D_R, 1)), last->dst.pos)){
+    if(vecEq((temp = shift(src, D_R, 1)), last->dst.pos)){
         setValidAt(moves, shift(temp, fdir, 1), true, true);
         return 1;
     }
     return 0;
 }
 
-uint castleMoves(Board board, Valid moves, Valid moved, const Vec2 src)
+uint castleMoves(Board board, Valid moves, Valid moved, const Vec src)
 {
-    const Piece srcPiece = pieceAt(board, src);
-    Piece rookPiece;
-    Vec2 r[2];
-    if(srcPiece == P_KING_B){
-        rookPiece = P_ROOK_B;
-        r[0] = (Vec2){.x = 0, .y = 0};
-        r[1] = (Vec2){.x = 7, .y = 0};
-    }else if(srcPiece == P_KING_W){
-        rookPiece = P_ROOK_W;
-        r[0] = (Vec2){.x = 0, .y = 7};
-        r[1] = (Vec2){.x = 7, .y = 7};
-    }else{
-        fwprintf(stderr, L"Error: cannot get castleMoves for non king at %ls\n", vec2Strify(src));
+    const Piece srcPiece = boardAt(board, src);
+    if(srcPiece != P_KING_B && srcPiece != P_KING_W){
+        fwprintf(stderr, L"Error: cannot get castleMoves for non king at %ls\n", vecStrify(src));
         exit(EXIT_FAILURE);
     }
+
+    Piece rookPiece = srcPiece == P_KING_B ? P_ROOK_B : P_ROOK_W;
+    Vec r[2] = {
+        (Vec){.x = 0, .y = srcPiece == P_KING_B ? 0 : 7},
+        (Vec){.x = 7, .y = srcPiece == P_KING_B ? 0 : 7}
+    };
 
     const Color srcColor = pieceColor(srcPiece);
     if(inCheck(board, srcColor))
@@ -336,60 +300,105 @@ uint castleMoves(Board board, Valid moves, Valid moved, const Vec2 src)
             continue;
         Board test;
         boardCpy(test, board);
-        pieceSet(test, src, P_EMPTY);
-        if(pieceSet(test, shift(src, d[i], 1), srcPiece) != P_EMPTY || inCheck(test, srcColor))
+        boardSet(test, src, P_EMPTY);
+        if(boardSet(test, shift(src, d[i], 1), srcPiece) != P_EMPTY || inCheck(test, srcColor))
             continue;
-        pieceSet(test, shift(src, d[i], i), P_EMPTY);
-        if(pieceSet(test, shift(src, d[i], 2), srcPiece) != P_EMPTY || inCheck(test, srcColor))
+        boardSet(test, shift(src, d[i], i), P_EMPTY);
+        if(boardSet(test, shift(src, d[i], 2), srcPiece) != P_EMPTY || inCheck(test, srcColor))
             continue;
         Piece testpiece;
         for(
-            Vec2 testpos = shift(r[i], dirInv(d[i]), 1);
-            (testpiece = pieceAt(board, testpos)) != srcPiece;
+            Vec testpos = shift(r[i], dirInv(d[i]), 1);
+            (testpiece = boardAt(board, testpos)) != srcPiece;
             testpos = shift(testpos, dirInv(d[i]), 1)
         ){
             if(testpiece != P_EMPTY)
                 goto skip;
         }
-        pieceSet(test, r[i], P_EMPTY);
-        pieceSet(test, shift(src, d[i], 1), rookPiece);
+        boardSet(test, r[i], P_EMPTY);
+        boardSet(test, shift(src, d[i], 1), rookPiece);
         if(!inCheck(test, srcColor)){
             setValidAt(moves, r[i], true, true);
             total++;
         }
-        skip:;
+        skip:
+        ;
     }
-
     return total;
 }
 
-uint validMoves(Turn *game, Valid moves, const Vec2 src)
+int invalidateCheckMoves(Board board, Valid moves, const Vec src)
+{
+    int invalid = 0;
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec dst = {.x = x, .y = y};
+            if(!getValidAt(moves, dst, true))
+                continue;
+            const Turn turn = {
+                .src = {
+                    .piece = boardAt(board, src),
+                    .pos = src
+                },
+                .dst = {
+                    .piece = boardAt(board, dst),
+                    .pos = dst
+                }
+            };
+            Board after;
+            boardCpy(after, board);
+            applyMove(after, turn);
+            if(inCheck(board, pieceColor(turn.src.piece))){
+                setValidAt(moves, dst, false, true);
+                invalid++;
+            }
+        }
+    }
+    return invalid;
+}
+
+uint validMoves(GameState state, Valid moves, const Vec src)
 {
     resetValid(moves);
-    Board board;
-    Valid moved;
-    Turn *last = consBoardState(board, moved, game, NULL);
     uint total = 0;
-    const Piece srcPiece = pieceAt(board, src);
+    const Piece srcPiece = boardAt(state.board, src);
 
     if(srcPiece == P_PAWN_B || srcPiece == P_PAWN_W)
-        total += passantMoves(board, moves, src, last);
+        total += passantMoves(state.board, moves, src, state.last);
 
     if(srcPiece == P_KING_B || srcPiece == P_KING_W)
-        total += castleMoves(board, moves, moved, src);
+        total += castleMoves(state.board, moves, state.moved, src);
 
-    total += validMovesStateless(board, moves, src);
+    total += validMovesStateless(state.board, moves, src);
+
     return total;
 }
 
-Turn* turnPosChanged(Turn *game, const Vec2 pos)
+void validAllReset(AllValid all)
 {
-    while(game){
-        if(eqVec2(game->src.pos, pos) || eqVec2(game->dst.pos, pos))
-            return game;
-        game = game->next;
+    for(int y = 0; y < 8; y++)
+        for(int x = 0; x < 8; x++)
+            resetValid(all[x][y]);
+}
+
+uint validAllMoves(GameState state, AllValid all)
+{
+    uint total = 0;
+    validAllReset(all);
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8; x++){
+            const Vec src = {.x = x, .y = y};
+            const Color srcColor = pieceColor(boardAt(state.board, src));
+            if(
+                (state.playerTurn == C_NONE && srcColor != state.playerTurn) ||
+                (state.playerTurn != C_NONE && srcColor == state.playerTurn)
+            ){
+                total += validMoves(state, all[x][y], src);
+                total -= invalidateCheckMoves(state.board, all[x][y], src);
+            }
+        }
     }
-    return NULL;
+    return total;
 }
 
 #endif /* end of include guard: MOVECHECK_H */

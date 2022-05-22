@@ -7,6 +7,12 @@ typedef wchar_t wc;
 typedef unsigned int uint;
 typedef unsigned long long ull;
 
+typedef enum{
+    D_U, D_UR, D_R, D_DR,
+    D_D, D_DL, D_L, D_UL,
+    D_N
+}Dir;
+
 typedef union{
     int arr[2];
     struct{
@@ -14,20 +20,22 @@ typedef union{
         int y;
     };
     struct{
-        int col;
-        int row;
+        Dir dir;
+        int len;
     };
-    struct{
-        int file;
-        int rank;
-    };
-}Vec2;
+}Vec;
 
 typedef enum{
     P_PAWN_W, P_ROOK_W, P_KNIGHT_W, P_BISHOP_W, P_QUEEN_W, P_KING_W,
     P_PAWN_B, P_ROOK_B, P_KNIGHT_B, P_BISHOP_B, P_QUEEN_B, P_KING_B,
     P_EMPTY, P_N
 }Piece;
+
+wc *PieceStr[P_N] = {
+    L"P_PAWN_W", L"P_ROOK_W", L"P_KNIGHT_W", L"P_BISHOP_W", L"P_QUEEN_W", L"P_KING_W",
+    L"P_PAWN_B", L"P_ROOK_B", L"P_KNIGHT_B", L"P_BISHOP_B", L"P_QUEEN_B", L"P_KING_B",
+    L"P_EMPTY"
+};
 
 typedef Piece Board[8][8];
 typedef wc BoardStr[BOARDSTRLEN];
@@ -59,12 +67,6 @@ const wc *GameStateTypeStr[G_N] = {
     L"G_NEUTRAL_W", L"G_NEUTRAL_B", L"G_CHECK_W", L"G_CHECK_B", L"G_DRAW", L"G_MATE_W", L"G_MATE_B"
 };
 
-typedef enum{
-    D_U, D_UR, D_R, D_DR,
-    D_D, D_DL, D_L, D_UL,
-    D_N
-}Dir;
-
 const wc *DirStr[D_N] = {
     L"D_U", L"D_UR", L"D_R", L"D_DR",
     L"D_D", L"D_DL", L"D_L", L"D_UL"
@@ -73,32 +75,25 @@ const wc *DirStr[D_N] = {
 typedef struct Turn{
     struct{
         Piece piece;
-        Vec2 pos;
+        Vec pos;
     }src;
     struct{
         Piece piece;
-        Vec2 pos;
+        Vec pos;
     }dst;
     struct Turn *next;
 }Turn;
 
 typedef struct{
-    GameStateType type;
+    Color playerTurn;
     Board board;
-    AllValid all;
-    Turn *game;
-    Turn *last;
     Valid moved;
+    Turn *turns;
+    Turn *last;
 }GameState;
 
-typedef enum{I_INVALID, I_HALF, I_FULL, I_VALID, I_N}InputType;
-const wc* InputTypeStr[I_N] = {
-    L"I_INVALID", L"I_HALF", L"I_FULL", L"I_VALID"
-};
-
 typedef struct{
-    InputType type;
-    Turn turn;
+    char str[512];
 }Input;
 
 Color colorInv(const Color color)

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef INCLUDES_H
+#define INCLUDES_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -13,7 +15,15 @@
 #include "Types.h"
 #include "Decls.h"
 
-#include "Vec2.h"
+#include "Vec.h"
+#include "Valid.h"
+#include "Piece.h"
+#include "Board.h"
+#include "Strify.h"
 #include "IO.h"
-#include "Game.h"
 #include "MoveCheck.h"
+#include "ConsState.h"
+#include "EvalState.h"
+
+
+#endif /* end of include guard: INCLUDES_H */

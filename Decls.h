@@ -1,20 +1,15 @@
 #ifndef DECLS_H
 #define DECLS_H
 
-wc* vec2Strify(const Vec2);
-bool vecValid(const Vec2, const bool);
-void resetValid(Valid);
-uint validMovesStateless(Board, Valid, const Vec2);
-uint validMoves(Turn *, Valid, const Vec2);
-bool getValidAt(Valid, const Vec2, const bool);
-void setValidAt(Valid, const Vec2, const bool, const bool);
-Turn* turnPosChanged(Turn *, const Vec2);
-Color pieceColor(const Piece);
-Piece pieceAt(Board, const Vec2);
-Vec2 getKing(Board, const Color);
+wc* vecStrify(const Vec);
+bool validPos(const Vec, const bool);
+void applyMove(Board, Turn);
+bool getValidAt(Valid, const Vec, const bool);
+void setValidAt(Valid, const Vec, const bool, const bool);
 bool inCheck(Board, const Color);
-bool movesCanEscapeCheck(Board, Valid, const Vec2, const Color);
-bool inCheckMate(Turn *, const Color);
-
+Turn* lastTurn(Turn *);
+GameState consGameState(Turn *, const Color);
+bool inCheck(Board, const Color);
+Color stateTypeColor(const GameStateType);
 
 #endif /* end of include guard: DECLS_H */

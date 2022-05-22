@@ -173,7 +173,7 @@ GameStateType evalGameState(GameState state)
         return colorToCheck(state.playerTurn);
     }
     AllValid all;
-    const uint total = validAllMoves(state, all, state.playerTurn);
+    const uint total = validAllMoves(state, all);
     if(total == 0)
         return G_DRAW;
     return colorToNeutral(state.playerTurn);
