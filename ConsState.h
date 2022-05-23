@@ -62,35 +62,38 @@ void applyMove(Board board, Turn turn)
         );
         exit(EXIT_FAILURE);
     }
-    if(!castle)
-        boardSet(board, turn.dst.pos, turn.dst.piece);
+    if(!castle){
+        boardSet(board, turn.dst.pos, turn.src.piece);
+    }
 }
 
-Turn *applyTurn(GameState state, Turn *turn)
+Turn *applyTurn(GameState *state, Turn *turn)
 {
     if(!turn)
         return NULL;
-    setValidAt(state.moved, turn->src.pos, true, true);
-    setValidAt(state.moved, turn->dst.pos, true, true);
-    applyMove(state.board, *turn);
-
+    setValidAt(state->moved, turn->src.pos, true, true);
+    setValidAt(state->moved, turn->dst.pos, true, true);
+    applyMove(state->board, *turn);
     return turn->next;
 }
 
-GameState consGameState(Turn *turns, const Color color)
+GameState consGameState(Turn *turns)
 {
-    GameState ret = {
+    GameState state = {
         .turns = turns,
-        .playerTurn = color
+        .playerTurn = C_WHITE,
+        .last = lastTurn(turns)
     };
-    resetBoard(ret.board);
-    resetValid(ret.moved);
+    resetBoard(state.board);
+    resetValid(state.moved);
     while(turns){
         if(!turns->next)
-            ret.last = turns;
-        turns = applyTurn(ret, turns);
+            state.last = turns;
+        turns = applyTurn(&state, turns);
+        state.playerTurn = colorInv(state.playerTurn);
     }
-    return ret;
+    boardPrint(state.board);
+    return state;
 }
 
 Turn* appendTurn(Turn *turns, Turn turn)

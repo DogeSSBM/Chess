@@ -8,8 +8,9 @@ bool getValidAt(Valid, const Vec, const bool);
 void setValidAt(Valid, const Vec, const bool, const bool);
 bool inCheck(Board, const Color);
 Turn* lastTurn(Turn *);
-GameState consGameState(Turn *, const Color);
+GameState consGameState(Turn *);
 bool inCheck(Board, const Color);
 Color stateTypeColor(const GameStateType);
+void boardStrify(Board, BoardStr);
 
 #endif /* end of include guard: DECLS_H */

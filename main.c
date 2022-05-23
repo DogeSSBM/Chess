@@ -6,16 +6,16 @@ int main(void)
 
     Turn *turns = NULL;
     Color nextTurn = C_WHITE;
+
     while(1){
+        printTurns(turns);
         // cons game state
-        GameState state = consGameState(turns, nextTurn);
+        GameState state = consGameState(turns);
         // display board state
-        BoardStr str;
-        boardStrify(state.board, str);
 
         // eval board state
         // if(isEndGame(evalGameState(state)))
-            // return 0;
+        //     return 0;
         // get all possible moves
         AllValid all;
         validAllMoves(state, all);

@@ -79,7 +79,7 @@ bool movesCanEscapeCheck(GameState state, const Vec src)
             Turn turn = {.src.pos = src, .dst.pos = dst};
             GameState applied = state;
             boardCpy(applied.board, state.board);
-            applyTurn(applied, &turn);
+            applyTurn(&applied, &turn);
             if(!inCheck(applied.board, state.playerTurn))
                 return true;
         }
@@ -186,6 +186,21 @@ Turn* lastTurn(Turn *turns)
     while(turns->next)
         turns = turns->next;
     return turns;
+}
+
+void printTurns(Turn *turns)
+{
+    uint i = 0;
+    while(turns){
+        wprintf(
+            L"turn %u: %lc%ls -> %lc%ls\n",
+            i,
+            pwc[turns->src.piece], vecStrify(turns->src.pos),
+            pwc[turns->dst.piece], vecStrify(turns->dst.pos)
+        );
+        i++;
+        turns = turns->next;
+    }
 }
 
 #endif /* end of include guard: EVALSTATE_H */

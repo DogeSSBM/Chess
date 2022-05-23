@@ -115,5 +115,9 @@ uint minu(const uint a, const uint b)
     return a<b?a:b;
 }
 
+int iabs(const int n)
+{
+    return n < 0 ? -n : n;
+}
 
 #endif /* end of include guard: TYPES_H */

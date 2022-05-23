@@ -249,8 +249,8 @@ bool pawnDoubleMove(Turn *turn)
     if(!turn)
         return false;
     return
-        (turn->src.piece == P_PAWN_B && turn->dst.piece == P_PAWN_B && turn->src.pos.y == 1 && turn->dst.pos.y == 3) ||
-        (turn->src.piece == P_PAWN_W && turn->dst.piece == P_PAWN_W && turn->src.pos.y == 6 && turn->dst.pos.y == 4);
+        (turn->src.piece == P_PAWN_B && turn->dst.piece == P_EMPTY && turn->src.pos.y == 1 && turn->dst.pos.y == 3) ||
+        (turn->src.piece == P_PAWN_W && turn->dst.piece == P_EMPTY && turn->src.pos.y == 6 && turn->dst.pos.y == 4);
 }
 
 uint passantMoves(Board board, Valid moves, const Vec src, Turn *last)
@@ -357,13 +357,20 @@ int invalidateCheckMoves(Board board, Valid moves, const Vec src)
     return invalid;
 }
 
+Piece pieceInv(const Piece piece)
+{
+    if(piece == P_EMPTY)
+        return P_EMPTY;
+    return piece < 6 ? piece + 6 : piece - 6;
+}
+
 uint validMoves(GameState state, Valid moves, const Vec src)
 {
     resetValid(moves);
     uint total = 0;
     const Piece srcPiece = boardAt(state.board, src);
 
-    if(srcPiece == P_PAWN_B || srcPiece == P_PAWN_W)
+    if(pawnDoubleMove(state.last) && (srcPiece == P_PAWN_B || srcPiece == P_PAWN_W))
         total += passantMoves(state.board, moves, src, state.last);
 
     if(srcPiece == P_KING_B || srcPiece == P_KING_W)

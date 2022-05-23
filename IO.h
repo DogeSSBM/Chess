@@ -45,7 +45,7 @@ void playerTurnPrompt(const Color playerTurn)
         fwprintf(stderr, L"Error: color invalid\n");
         exit(EXIT_FAILURE);
     }
-    wprintf(L"%ls's turn... -\n", ColorStr[playerTurn]);
+    wprintf(L"%ls's turn...\n", ColorStr[playerTurn]);
 }
 
 Vec vecParse(const Input in)

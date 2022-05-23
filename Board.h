@@ -13,7 +13,7 @@ void resetBoard(Board board)
         { P_PAWN_W, P_PAWN_W, P_PAWN_W, P_PAWN_W,  P_PAWN_W, P_PAWN_W, P_PAWN_W, P_PAWN_W },
         { P_ROOK_W, P_KNIGHT_W, P_BISHOP_W, P_QUEEN_W, P_KING_W, P_BISHOP_W, P_KNIGHT_W, P_ROOK_W }
     };
-    
+
     for(uint i = 0; i < 8; i++)
         memcpy(board[i], initialBoard[i], sizeof(Piece)*8);
 }
@@ -36,16 +36,15 @@ Piece boardSet(Board board, const Vec pos, const Piece piece)
     return oldPiece;
 }
 
-
 Vec boardGet(Board board, const Color srcColor)
 {
     if(srcColor == C_NONE){
         fwprintf(stderr, L"Error: cannot get C_BLACK king\n");
         exit(EXIT_FAILURE);
     }
-    
+
     const Piece srcPiece = srcColor == C_WHITE ? P_KING_W : P_KING_B;
-    
+
     for(int y = 0; y < 8; y++){
         for(int x = 0; x < 8; x++){
             const Vec pos = {.x = x, .y = y};
@@ -55,8 +54,15 @@ Vec boardGet(Board board, const Color srcColor)
     }
     fwprintf(stderr, L"Error: could not find player %ls's king\n", ColorStr[srcColor]);
     exit(EXIT_FAILURE);
-    
+
     return (const Vec){.x=-1, .y=-1};
+}
+
+void boardPrint(Board board)
+{
+    BoardStr str;
+    boardStrify(board, str);
+    wprintf(L"%ls\n", str);
 }
 
 #endif /* end of include guard: BOARD_H */
