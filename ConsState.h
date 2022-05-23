@@ -92,7 +92,6 @@ GameState consGameState(Turn *turns)
         turns = applyTurn(&state, turns);
         state.playerTurn = colorInv(state.playerTurn);
     }
-    boardPrint(state.board);
     return state;
 }
 
